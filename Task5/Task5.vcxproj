@@ -127,12 +127,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Cursor.cpp" />
+    <ClCompile Include="BackGround.cpp" />
     <ClCompile Include="Screen.cpp" />
     <ClCompile Include="Task5.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Cursor.h" />
+    <ClInclude Include="BackGround.h" />
     <ClInclude Include="Screen.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

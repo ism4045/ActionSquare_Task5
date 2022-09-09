@@ -2,6 +2,7 @@
 
 Screen::Screen()
 {
+
 	CONSOLE_CURSOR_INFO cci;
 
 	doubleBuffer[0] = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
@@ -28,36 +29,25 @@ void Screen::ScreenClear()
 	FillConsoleOutputCharacter(doubleBuffer[screenIndex], ' ', 100 * 100, Coor, &dw);
 }
 
-void Screen::DrawPath(const vector<vector<int>>& map)
+void Screen::DrawBackGround()
 {
 	DWORD dw;
-	for (int i = 0; i < map.size(); i++) {
-		for (int j = 0; j < map[i].size(); j++) {
-			COORD pos = { (short)j * 2,(short)i };
+	pair<short, short> startPos = { 5,3 };
+	for (int i = 0; i < BG.PlayBox.size(); i++) {
+		for (int j = 0; j < BG.PlayBox[i].size(); j++) {
+			COORD pos = { startPos.first+(short)j * 2,startPos.second+(short)i };
 			SetConsoleCursorPosition(doubleBuffer[screenIndex], pos);
-
-			if (map[i][j] == 1) {
-				WriteFile(doubleBuffer[screenIndex], "бс", strlen("бс"), &dw, NULL);
-			}
+			string str = BG.PlayBox[i][j];
+			WriteFile(doubleBuffer[screenIndex], str.c_str(), strlen(str.c_str()), &dw, NULL);
 		}
 	}
 }
 
-void Screen::DrawCursor(const int& x, const int& y, const char* str)
-{
-	DWORD dw;
-	COORD pos = { (short)x * 2,(short)y };
-
-	SetConsoleCursorPosition(doubleBuffer[screenIndex], pos);
-	WriteFile(doubleBuffer[screenIndex], str, strlen(str), &dw, NULL);
-}
-
-void Screen::Render(const int& x, const int& y, const vector<vector<int>>& map, const char* str)
+void Screen::Render()
 {
 	ScreenClear();
-
-	DrawPath(map);
-	DrawCursor(x, y, str);
+	
+	DrawBackGround();
 
 	ScreenFlipping();
 }

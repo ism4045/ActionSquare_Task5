@@ -18,18 +18,18 @@
     <ClCompile Include="Task5.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Cursor.cpp">
+    <ClCompile Include="Screen.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Screen.cpp">
+    <ClCompile Include="BackGround.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Cursor.h">
+    <ClInclude Include="Screen.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Screen.h">
+    <ClInclude Include="BackGround.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
