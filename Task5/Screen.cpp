@@ -1,7 +1,8 @@
 #include "Screen.h"
 
-Screen::Screen()
+Screen::Screen(Player& P)
 {
+	player = &P;
 
 	CONSOLE_CURSOR_INFO cci;
 
@@ -41,6 +42,47 @@ void Screen::DrawBackGround()
 			WriteFile(doubleBuffer[screenIndex], str.c_str(), strlen(str.c_str()), &dw, NULL);
 		}
 	}
+
+	startPos = { 29,2 };
+	for (int i = 0; i < BG.nextBox.size(); i++) {
+		for (int j = 0; j < BG.nextBox[i].size(); j++) {
+			COORD pos = { startPos.first + (short)j * 2,startPos.second + (short)i };
+			SetConsoleCursorPosition(doubleBuffer[screenIndex], pos);
+			string str = BG.nextBox[i][j];
+			WriteFile(doubleBuffer[screenIndex], str.c_str(), strlen(str.c_str()), &dw, NULL);
+		}
+	}
+}
+
+void Screen::DrawPlayBoard() {
+	DWORD dw;
+	pair<short, short> startPos = { 7,4 };
+	for (int i = 0; i < player->board.size()-1; i++) {
+		for (int j = 0; j < player->board[i].size(); j++) {
+			COORD pos = { startPos.first + (short)j * 2,startPos.second + (short)i };
+			SetConsoleCursorPosition(doubleBuffer[screenIndex], pos);
+			string str = "";
+			if (player->board[i][j] == 8) str = " ";
+			else str = "бс";
+			WriteFile(doubleBuffer[screenIndex], str.c_str(), strlen(str.c_str()), &dw, NULL);
+		}
+	}
+}
+
+void Screen::DrawNextBlock() {
+	DWORD dw;
+	pair<short, short> startPos = { 31,5 };
+	for (int i = 0; i < player->nextBlock.size(); i++) {
+		for (int j = 0; j < player->nextBlock[i].tileInfo.size(); j++) {
+			COORD pos = { startPos.first + (short)j * 2,startPos.second + (short)i };
+			SetConsoleCursorPosition(doubleBuffer[screenIndex], pos);
+			string str = "";
+			if (player->board[i][j] == 8) str = " ";
+			else str = "бс";
+			WriteFile(doubleBuffer[screenIndex], str.c_str(), strlen(str.c_str()), &dw, NULL);
+		}
+	}
+
 }
 
 void Screen::Render()
@@ -48,6 +90,7 @@ void Screen::Render()
 	ScreenClear();
 	
 	DrawBackGround();
+	DrawPlayBoard();
 
 	ScreenFlipping();
 }

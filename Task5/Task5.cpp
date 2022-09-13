@@ -1,5 +1,6 @@
 #include "Screen.h"
 #include "BackGround.h"
+#include "Player.h"
 #include <Windows.h>
 #include <iostream>
 #include <conio.h>
@@ -15,9 +16,10 @@ char input() {
 }
 
 int main() {
-	Screen scr;
-	int n, m, setSpeed;
-	cin >> n >> m >> setSpeed;
+	Player P;
+	Screen scr(P);
+	int setSpeed;
+	cin >> setSpeed;
 
 	double movePeriod = 1000.0 / setSpeed;
 	double cursorPeriod = 1000.0 / 4;
@@ -27,7 +29,7 @@ int main() {
 	clock_t cursorStart = clock();
 	clock_t moveCurrent;
 	clock_t cursorCurrent;
-	BackGround BG;
+
 	while (1)
 	{
 		movePeriod = 1000.0 / setSpeed;
@@ -36,6 +38,11 @@ int main() {
 
 		char command = input();
 		if (command == ' ') stop = !stop;
+
+		if (moveCurrent - moveStart >= movePeriod && !stop) {
+			P.FallBlock();
+			moveStart = moveCurrent;
+		}
 
 		scr.Render();
 	}
