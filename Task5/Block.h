@@ -14,8 +14,8 @@ enum BlockType {
 
 struct Tile
 {
-	int offsetX;
-	int offsetY;
+	int X;
+	int Y;
 };
 
 class Block {

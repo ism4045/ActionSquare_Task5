@@ -115,26 +115,28 @@ void Block::setTileOffset(BlockType blockType)
 		offsetData[3].push_back({ -2,0 });
 	}
 	else {
-		offsetData[0].push_back({ 0,0 });
-		offsetData[1].push_back({ 1,0 });
-		offsetData[2].push_back({ 1,-1 });
-		offsetData[3].push_back({ 0,-1 });
+		for (int i = 0; i < 5; i++) {
+			offsetData[0].push_back({ 0,0 });
+			offsetData[1].push_back({ 1,0 });
+			offsetData[2].push_back({ 1,-1 });
+			offsetData[3].push_back({ 0,-1 });
+		}
 	}
 }
 
 void Block::rotateBlock()
 {
 	for (int i = 0; i < tileInfo.size(); i++) {
-		if (tileInfo[i].offsetX == 0 || tileInfo[i].offsetY == 0) {
-			if (tileInfo[i].offsetY == 0) {
-				tileInfo[i].offsetX = tileInfo[i].offsetX - 2 * tileInfo[i].offsetX;
+		if (tileInfo[i].X == 0 || tileInfo[i].Y == 0) {
+			if (tileInfo[i].Y == 0) {
+				tileInfo[i].X = tileInfo[i].X - 2 * tileInfo[i].X;
 			}
-			swap(tileInfo[i].offsetX, tileInfo[i].offsetY);
+			swap(tileInfo[i].X, tileInfo[i].Y);
 		}
-		else if ((tileInfo[i].offsetX < 0 && tileInfo[i].offsetY < 0) || (tileInfo[i].offsetX > 0 && tileInfo[i].offsetY > 0)) 
-			tileInfo[i].offsetY = tileInfo[i].offsetY - 2 * tileInfo[i].offsetY;
+		else if ((tileInfo[i].X < 0 && tileInfo[i].Y < 0) || (tileInfo[i].X > 0 && tileInfo[i].Y > 0)) 
+			tileInfo[i].Y = tileInfo[i].Y - 2 * tileInfo[i].Y;
 		else 
-			tileInfo[i].offsetX = tileInfo[i].offsetX - 2 * tileInfo[i].offsetX;
+			tileInfo[i].X = tileInfo[i].X - 2 * tileInfo[i].X;
 	}
 }
 

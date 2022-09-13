@@ -71,16 +71,15 @@ void Screen::DrawPlayBoard() {
 
 void Screen::DrawNextBlock() {
 	DWORD dw;
-	pair<short, short> startPos = { 31,5 };
+	pair<short, short> startPos = { 33,5 };
 	for (int i = 0; i < player->nextBlock.size(); i++) {
 		for (int j = 0; j < player->nextBlock[i].tileInfo.size(); j++) {
-			COORD pos = { startPos.first + (short)j * 2,startPos.second + (short)i };
+			COORD pos = { startPos.first + (short)player->nextBlock[i].tileInfo[j].Y * 2,startPos.second + (short)player->nextBlock[i].tileInfo[j].X };
 			SetConsoleCursorPosition(doubleBuffer[screenIndex], pos);
-			string str = "";
-			if (player->board[i][j] == 8) str = " ";
-			else str = "бс";
+			string str = "бс";
 			WriteFile(doubleBuffer[screenIndex], str.c_str(), strlen(str.c_str()), &dw, NULL);
 		}
+		startPos = { 33,startPos.second + 3 };
 	}
 
 }
@@ -91,6 +90,7 @@ void Screen::Render()
 	
 	DrawBackGround();
 	DrawPlayBoard();
+	DrawNextBlock();
 
 	ScreenFlipping();
 }

@@ -21,6 +21,8 @@ int main() {
 	int setSpeed;
 	cin >> setSpeed;
 
+	int highSpeed = 20;
+	int defaultSpeed = setSpeed;
 	double movePeriod = 1000.0 / setSpeed;
 	double cursorPeriod = 1000.0 / 4;
 	bool stop = false;
@@ -29,8 +31,7 @@ int main() {
 	clock_t cursorStart = clock();
 	clock_t moveCurrent;
 	clock_t cursorCurrent;
-
-	while (1)
+	while (P.getState() != gameover)
 	{
 		movePeriod = 1000.0 / setSpeed;
 		if (!stop) moveCurrent = clock();
@@ -38,6 +39,10 @@ int main() {
 
 		char command = input();
 		if (command == ' ') stop = !stop;
+		if (command == 77 || command == 75) P.MoveLR(command);
+		if (command == 72) P.RotateBlock();
+		if (GetKeyState(VK_DOWN) & 0x8000) setSpeed = highSpeed;
+		else setSpeed = defaultSpeed;
 
 		if (moveCurrent - moveStart >= movePeriod && !stop) {
 			P.FallBlock();
