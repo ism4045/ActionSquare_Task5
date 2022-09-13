@@ -20,6 +20,10 @@ Player::Player()
 	}
 
 	SpawnBlock();
+
+	line = 0;
+	level = 0;
+	score = 0;
 }
 
 void Player::SpawnBlock()
@@ -122,12 +126,15 @@ void Player::CheckCompleteLine()
 			}
 		}
 		if (isComplete) {
-			playerState = removing;
 			board[i].assign(10, 8);
 			removeLine.push_back(i);
 		}
 	}
 	if (!removeLine.empty()) {
+		playerState = removing;
+
+		CalculateInfo(removeLine.size());
+
 		for (int i = 0; i < removeLine.size(); i++) {
 			int temp = removeLine[i];
 			for (int j = temp; j >= 1; j--) {
@@ -137,6 +144,16 @@ void Player::CheckCompleteLine()
 		}
 	}
 	removeLine.clear();
+}
+
+void Player::CalculateInfo(int clearLineNum) {
+	int temp = 40;
+	if (clearLineNum == 2) temp = 100;
+	else if (clearLineNum == 3) temp = 300;
+	else if (clearLineNum >= 4) temp = 1200;
+	score += temp * (level + 1);
+	line += removeLine.size();
+	level = line / 10;
 }
 
 bool Player::CanProcess()
@@ -200,7 +217,7 @@ bool Player::CanMoveLR(char c)
 		if (c == 75) posY = iter->second - 1;
 		else posY = iter->second + 1;
 
-		if (posY < 0 || posY >= 10) return false;
+		if ( iter->first < 0 ||posY < 0 || posY >= 10) return false;
 		else if (board[iter->first][posY] != 8) {
 			return false;
 		}

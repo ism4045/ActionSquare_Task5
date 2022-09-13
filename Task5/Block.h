@@ -28,4 +28,5 @@ public:
 
 	vector<vector<pair<int, int>>> offsetData;
 	vector<Tile> tileInfo;
+	BlockType Type;
 };

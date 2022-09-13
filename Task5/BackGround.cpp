@@ -4,34 +4,35 @@ BackGround::BackGround()
 {
 	makePlayBox();
 	makeNextBox();
+	makeManual();
 }
 
 void BackGround::makePlayBox() {
 	PlayBox.resize(22);
 	for (int i = 0; i < PlayBox.size(); i++) {
 		if (i == 0) {
-			PlayBox[i].push_back("旨");
+			PlayBox[i].push_back(" ");
 			for (int j = 1; j <= 10; j++)
-				PlayBox[i].push_back("收");
-			PlayBox[i].push_back("旬");
+				PlayBox[i].push_back("～");
+			PlayBox[i].push_back(" ");
 		}
 		else if (i == 21) {
-			PlayBox[i].push_back("曲");
+			PlayBox[i].push_back(" ");
 			for (int j = 1; j <= 10; j++)
-				PlayBox[i].push_back("收");
-			PlayBox[i].push_back("旭");
+				PlayBox[i].push_back("∪");
+			PlayBox[i].push_back(" ");
 		}
 		else {
-			PlayBox[i].push_back("早");
+			PlayBox[i].push_back("９");
 			for (int j = 1; j <= 10; j++)
 				PlayBox[i].push_back(" ");
-			PlayBox[i].push_back("早");
+			PlayBox[i].push_back("Ⅱ");
 		}
 	}
 }
 
 void BackGround::makeNextBox() {
-	nextBox.resize(17);
+	nextBox.resize(5);
 	for (int i = 0; i < nextBox.size(); i++) {
 		if (i == 0) {
 			nextBox[i].push_back(" ");
@@ -42,28 +43,29 @@ void BackGround::makeNextBox() {
 			nextBox[i].push_back(" ");
 		}
 		else if (i == 1) {
-			nextBox[i].push_back("旨");
+			nextBox[i].push_back(" ");
 			for (int j = 1; j < 5; j++) 
-				nextBox[i].push_back("收");
-			nextBox[i].push_back("旬");
+				nextBox[i].push_back("～");
+			nextBox[i].push_back(" ");
 		}
-		else if (i == 16) {
-			nextBox[i].push_back("曲");
+		else if (i == 4) {
+			nextBox[i].push_back(" ");
 			for (int j = 1; j < 5; j++)
-				nextBox[i].push_back("收");
-			nextBox[i].push_back("旭");
-		}
-		else if (i % 3 == 1) {
-			nextBox[i].push_back("曳");
-			for (int j = 1; j < 5; j++) 
-				nextBox[i].push_back("收");
-			nextBox[i].push_back("朽");
+				nextBox[i].push_back("∪");
+			nextBox[i].push_back(" ");
 		}
 		else {
-			nextBox[i].push_back("早");
+			nextBox[i].push_back("９");
 			for (int j = 1; j < 5; j++)
 				nextBox[i].push_back(" ");
-			nextBox[i].push_back("早");
+			nextBox[i].push_back("Ⅱ");
 		}
 	}
+}
+
+void BackGround::makeManual()
+{
+	manual.push_back("∠⊥ : Move Left Right");
+	manual.push_back("∟ : Rotate Clock Direction");
+	manual.push_back("⊿ : Soft Drop");
 }

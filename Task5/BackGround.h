@@ -7,6 +7,8 @@ public:
 	BackGround();
 	void makePlayBox();
 	void makeNextBox();
+	void makeManual();
 	vector<vector<string>> PlayBox;
 	vector<vector<string>> nextBox;
+	vector<string> manual;
 };

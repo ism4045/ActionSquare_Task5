@@ -1,4 +1,10 @@
-﻿  Player.cpp
-C:\Users\action\Documents\GitHub\ActionSquare_Task5\Task5\Player.cpp(6,12): warning C4244: '인수': 'time_t'에서 'unsigned int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\action\Documents\GitHub\ActionSquare_Task5\Task5\Player.cpp(35,12): warning C4244: '인수': 'time_t'에서 'unsigned int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+﻿  Screen.cpp
+C:\Users\action\Documents\GitHub\ActionSquare_Task5\Task5\Screen.cpp(64,84): warning C4267: '인수': 'size_t'에서 'DWORD'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\action\Documents\GitHub\ActionSquare_Task5\Task5\Screen.cpp(74,84): warning C4267: '인수': 'size_t'에서 'DWORD'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\action\Documents\GitHub\ActionSquare_Task5\Task5\Screen.cpp(91,84): warning C4267: '인수': 'size_t'에서 'DWORD'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\action\Documents\GitHub\ActionSquare_Task5\Task5\Screen.cpp(106,83): warning C4267: '인수': 'size_t'에서 'DWORD'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\action\Documents\GitHub\ActionSquare_Task5\Task5\Screen.cpp(122,82): warning C4267: '인수': 'size_t'에서 'DWORD'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\action\Documents\GitHub\ActionSquare_Task5\Task5\Screen.cpp(126,82): warning C4267: '인수': 'size_t'에서 'DWORD'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\action\Documents\GitHub\ActionSquare_Task5\Task5\Screen.cpp(130,82): warning C4267: '인수': 'size_t'에서 'DWORD'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\action\Documents\GitHub\ActionSquare_Task5\Task5\Screen.cpp(141,83): warning C4267: '인수': 'size_t'에서 'DWORD'(으)로 변환하면서 데이터가 손실될 수 있습니다.
   Task5.vcxproj -> C:\Users\action\Documents\GitHub\ActionSquare_Task5\x64\Debug\Task5.exe

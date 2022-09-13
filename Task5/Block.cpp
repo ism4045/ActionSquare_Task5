@@ -4,6 +4,7 @@ void Block::initialize(BlockType blockType)
 {
 	setTileInfo(blockType);
 	setTileOffset(blockType);
+	Type = blockType;
 }
 
 void Block::setTileInfo(BlockType blockType)
