@@ -20,6 +20,8 @@ struct Tile
 
 class Block {
 public:
+	Block();
+	Block(BlockType blockType);
 	void initialize(BlockType blockType);
 
 	void setTileInfo(BlockType blockType);

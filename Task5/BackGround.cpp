@@ -68,4 +68,5 @@ void BackGround::makeManual()
 	manual.push_back("¡ç¡æ : Move Left Right");
 	manual.push_back("¡è : Rotate Clock Direction");
 	manual.push_back("¡é : Soft Drop");
+	manual.push_back("Space : Hard Drop");
 }

@@ -1,5 +1,15 @@
 #include "Block.h"
 
+Block::Block()
+{
+	initialize(Z1);
+}
+
+Block::Block(BlockType blockType)
+{
+	initialize(blockType);
+}
+
 void Block::initialize(BlockType blockType)
 {
 	setTileInfo(blockType);

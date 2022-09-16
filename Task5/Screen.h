@@ -4,22 +4,24 @@
 #include <ctime>
 #include <vector>
 #include "BackGround.h"
-#include "Player.h"
+#include "PlayGame.h"
 #include "Block.h"
 #include <string>
 using namespace std;
 
 class Screen {
 public:
-	Screen(Player& P);
+	Screen(PlayGame& P);
 	void ScreenFlipping();
 	void ScreenClear();
 
 	void DrawBackGround();
+	void DrawManual();
+
 	void DrawPlayBoard();
 	void DrawNextBlock();
 	void DrawPlayerInfo();
-	void DrawManual();
+
 	void Render();
 
 	void TextColor(int foreGround, int backGround);
@@ -27,7 +29,7 @@ public:
 	void ResetColor();
 private:
 	BackGround BG;
-	Player* player;
+	PlayGame* game;
 
 	bool screenIndex;
 	HANDLE doubleBuffer[2];

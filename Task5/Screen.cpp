@@ -1,8 +1,5 @@
 #include "Screen.h"
 
-
-
-
 void Screen::TextColor(int foreGround, int backGround) {
 	int color = foreGround + backGround * 16;
 	SetConsoleTextAttribute(doubleBuffer[screenIndex], color);
@@ -21,9 +18,9 @@ void Screen::DecisionBlockColor(int blockType) {
 
 void Screen::ResetColor() { TextColor(15, 0); }
 
-Screen::Screen(Player& P)
+Screen::Screen(PlayGame& P)
 {
-	player = &P;
+	game = &P;
 
 	CONSOLE_CURSOR_INFO cci;
 
@@ -78,7 +75,7 @@ void Screen::DrawBackGround()
 
 void Screen::DrawPlayBoard() {
 	DWORD dw;
-	vector<vector<int>> tempBoard = player->getBoard();
+	vector<vector<int>> tempBoard = game->GetBoard();
 	pair<short, short> startPos = { centerPos.first+2,centerPos.second+1 };
 	for (int i = 0; i < tempBoard.size()-1; i++) {
 		for (int j = 0; j < tempBoard[i].size(); j++) {
@@ -86,8 +83,14 @@ void Screen::DrawPlayBoard() {
 			SetConsoleCursorPosition(doubleBuffer[screenIndex], pos);
 			DecisionBlockColor(tempBoard[i][j]);
 			string str = "";
-			if (tempBoard[i][j] == 8) str = " ";
-			else str = "бс";
+			if (tempBoard[i][j] == 8) 
+				str = " ";
+			else if (tempBoard[i][j] == 9) {
+				ResetColor();
+				str = "бр";
+			}
+			else 
+				str = "бс";
 			WriteFile(doubleBuffer[screenIndex], str.c_str(), strlen(str.c_str()), &dw, NULL);
 		}
 	}
@@ -96,12 +99,12 @@ void Screen::DrawPlayBoard() {
 
 void Screen::DrawNextBlock() {
 	DWORD dw;
-	vector<Block> tempNextBlock = player->getNextBlock();
+	Block tempNextBlock = game->GetNextBlock();
 	pair<short, short> startPos = { centerPos.first+32,centerPos.second+2 };
-	for (int j = 0; j < tempNextBlock[0].tileInfo.size(); j++) {
-		COORD pos = { startPos.first + (short)tempNextBlock[0].tileInfo[j].Y * 2,startPos.second + (short)tempNextBlock[0].tileInfo[j].X };
+	for (int j = 0; j < tempNextBlock.tileInfo.size(); j++) {
+		COORD pos = { startPos.first + (short)tempNextBlock.tileInfo[j].Y * 2,startPos.second + (short)tempNextBlock.tileInfo[j].X };
 		SetConsoleCursorPosition(doubleBuffer[screenIndex], pos);
-		DecisionBlockColor((int)tempNextBlock[0].Type);
+		DecisionBlockColor((int)tempNextBlock.Type);
 		string str = "бс";
 		WriteFile(doubleBuffer[screenIndex], str.c_str(), strlen(str.c_str()), &dw, NULL);
 	}
@@ -111,9 +114,9 @@ void Screen::DrawNextBlock() {
 
 void Screen::DrawPlayerInfo()
 {
-	int tempLevel = player->getLevel();
-	int templine = player->getLine();
-	int tempScore = player->getScore();
+	int tempLevel = game->GetLevel();
+	int templine = game->GetLine();
+	int tempScore = game->GetScore();
 	DWORD dw;
 	pair<short, short> startPos = { centerPos.first + 5,centerPos.second +6 };
 	COORD pos = { startPos.first * 2, startPos.second };

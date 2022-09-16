@@ -129,14 +129,18 @@
   <ItemGroup>
     <ClCompile Include="BackGround.cpp" />
     <ClCompile Include="Block.cpp" />
-    <ClCompile Include="Player.cpp" />
+    <ClCompile Include="GameManager.cpp" />
+    <ClCompile Include="PlayGame.cpp" />
+    <ClCompile Include="Input.cpp" />
     <ClCompile Include="Screen.cpp" />
     <ClCompile Include="Task5.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BackGround.h" />
     <ClInclude Include="Block.h" />
-    <ClInclude Include="Player.h" />
+    <ClInclude Include="GameManager.h" />
+    <ClInclude Include="PlayGame.h" />
+    <ClInclude Include="Input.h" />
     <ClInclude Include="Screen.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
