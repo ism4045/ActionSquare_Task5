@@ -50,6 +50,7 @@ public:
 	int GetLevel() { return level; }
 	int GetScore() { return score; }
 	bool GetStop() { return stop; }
+	PlayGameState GetPlayGameState() { return gameState; }
 	Block GetNextBlock() { return nextBlock; }
 	vector<vector<int>> GetBoard() { return board; }
 

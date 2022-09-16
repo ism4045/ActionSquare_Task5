@@ -8,7 +8,11 @@ public:
 	void makePlayBox();
 	void makeNextBox();
 	void makeManual();
-	vector<vector<string>> PlayBox;
+	void makeIntroBox();
+
+	vector<vector<string>> playBox;
 	vector<vector<string>> nextBox;
+
+	vector<string> introStr;
 	vector<string> manual;
 };

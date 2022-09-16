@@ -5,28 +5,29 @@ BackGround::BackGround()
 	makePlayBox();
 	makeNextBox();
 	makeManual();
+	makeIntroBox();
 }
 
 void BackGround::makePlayBox() {
-	PlayBox.resize(22);
-	for (int i = 0; i < PlayBox.size(); i++) {
+	playBox.resize(22);
+	for (int i = 0; i < playBox.size(); i++) {
 		if (i == 0) {
-			PlayBox[i].push_back(" ");
+			playBox[i].push_back(" ");
 			for (int j = 1; j <= 10; j++)
-				PlayBox[i].push_back("▲");
-			PlayBox[i].push_back(" ");
+				playBox[i].push_back("▲");
+			playBox[i].push_back(" ");
 		}
 		else if (i == 21) {
-			PlayBox[i].push_back(" ");
+			playBox[i].push_back(" ");
 			for (int j = 1; j <= 10; j++)
-				PlayBox[i].push_back("▼");
-			PlayBox[i].push_back(" ");
+				playBox[i].push_back("▼");
+			playBox[i].push_back(" ");
 		}
 		else {
-			PlayBox[i].push_back("◀");
+			playBox[i].push_back("◀");
 			for (int j = 1; j <= 10; j++)
-				PlayBox[i].push_back(" ");
-			PlayBox[i].push_back("▶");
+				playBox[i].push_back(" ");
+			playBox[i].push_back("▶");
 		}
 	}
 }
@@ -69,4 +70,18 @@ void BackGround::makeManual()
 	manual.push_back("↑ : Rotate Clock Direction");
 	manual.push_back("↓ : Soft Drop");
 	manual.push_back("Space : Hard Drop");
+	manual.push_back("Esc : Pause");
+}
+
+void BackGround::makeIntroBox()
+{
+	introStr.push_back("          이호성의 테트리스           ");
+	introStr.push_back("                                      ");
+	introStr.push_back("    Press Enter key to play Tetris    ");
+	introStr.push_back("                                      ");
+	introStr.push_back("                                      ");
+	introStr.push_back("    UI Developer    : Lee Ho Seoung   ");
+	introStr.push_back("    Logic Developer : Lee Ho Seoung   ");
+	introStr.push_back("    Input Developer : Lee Ho Seoung   ");
+	introStr.push_back("    Director        : Lee Ho Seoung   ");
 }

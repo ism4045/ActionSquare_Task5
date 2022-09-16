@@ -4,6 +4,7 @@
 #include <conio.h>
 #include <map>
 #include "PlayGame.h"
+#include "GameManager.h"
 using namespace std;
 enum PadState {
 	Nothing,
@@ -13,7 +14,7 @@ enum PadState {
 };
 
 class kbState {
-	friend class Input;
+	friend class InputManager;
 	kbState(int VK);
 	PadState GetKbState();
 private:
@@ -28,20 +29,27 @@ struct MappingKey
 	map<int, kbState*> checkKeyState;
 };
 
-class Input {
+class InputManager {
 public:
-	Input(PlayGame& g);
+	InputManager(GameManager& gm);
+
 	void PlayGameInput();
 	void PlayGameSetInput();
 
-	void MenuInput();
-	void MenuSetInput();
+	void IntroInput();
+	void IntroSetInput();
 
-	void EndInput();
-	void EndSetInput();
+	void ROE_Input();
+	void ROE_SetInput();
+
+	void Input();
 private:
-	MappingKey playGameKey;
-	MappingKey menuKey;
-	MappingKey endKey;
+	map<pair<int, PadState>, void (PlayGame::*)()> playGameMappingKey;
+	map<int, kbState*> playGameCheckKeyState;
+	map<pair<int, PadState>, void (GameManager::*)()> introMappingKey;
+	map<int, kbState*> introCheckKeyState;
+	map<pair<int, PadState>, void (GameManager::*)()> ROEMappingKey;
+	map<int, kbState*> ROECheckKeyState;
 	PlayGame *game;
+	GameManager* gameManager;
 };

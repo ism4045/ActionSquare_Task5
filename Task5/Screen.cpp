@@ -18,10 +18,10 @@ void Screen::DecisionBlockColor(int blockType) {
 
 void Screen::ResetColor() { TextColor(15, 0); }
 
-Screen::Screen(PlayGame& P)
+Screen::Screen(GameManager& gm)
 {
-	game = &P;
-
+	game = gm.PG;
+	gameManager = &gm;
 	CONSOLE_CURSOR_INFO cci;
 
 	doubleBuffer[0] = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
@@ -34,6 +34,8 @@ Screen::Screen(PlayGame& P)
 
 	screenIndex = true;
 	centerPos = { 20,3 };
+	introStart = clock();
+	blink = false;
 }
 
 void Screen::ScreenFlipping()
@@ -49,15 +51,40 @@ void Screen::ScreenClear()
 	FillConsoleOutputCharacter(doubleBuffer[screenIndex], ' ', 100 * 100, Coor, &dw);
 }
 
+void Screen::DrawIntro()
+{
+	introCurrent = clock();
+	if (introCurrent - introStart >= 500.0) {
+		blink = !blink;
+		introStart = introCurrent;
+	}
+	DWORD dw;
+	pair<short, short> startPos = centerPos;
+	for (int i = 0; i < BG.introStr.size(); i++) {
+		COORD pos = { startPos.first, startPos.second+i};
+		SetConsoleCursorPosition(doubleBuffer[screenIndex], pos);
+
+		string str;
+		if (!blink && i == 2)
+			str = BG.introStr[i];
+		else if (blink && i == 2) 
+			str = " ";
+		else 
+			str = BG.introStr[i];
+
+		WriteFile(doubleBuffer[screenIndex], str.c_str(), strlen(str.c_str()), &dw, NULL);
+	}
+}
+
 void Screen::DrawBackGround()
 {
 	DWORD dw;
 	pair<short, short> startPos = centerPos;
-	for (int i = 0; i < BG.PlayBox.size(); i++) {
-		for (int j = 0; j < BG.PlayBox[i].size(); j++) {
+	for (int i = 0; i < BG.playBox.size(); i++) {
+		for (int j = 0; j < BG.playBox[i].size(); j++) {
 			COORD pos = { startPos.first+(short)j * 2,startPos.second+(short)i };
 			SetConsoleCursorPosition(doubleBuffer[screenIndex], pos);
-			string str = BG.PlayBox[i][j];
+			string str = BG.playBox[i][j];
 			WriteFile(doubleBuffer[screenIndex], str.c_str(), strlen(str.c_str()), &dw, NULL);
 		}
 	}
@@ -133,10 +160,25 @@ void Screen::DrawPlayerInfo()
 	WriteFile(doubleBuffer[screenIndex], str.c_str(), strlen(str.c_str()), &dw, NULL);
 }
 
+void Screen::DrawROE()
+{
+	DWORD dw;
+	pair<short, short> startPos = centerPos;
+	COORD pos = { startPos.first,startPos.second };
+	SetConsoleCursorPosition(doubleBuffer[screenIndex], pos);
+	string str = "      Game Over     ";
+	WriteFile(doubleBuffer[screenIndex], str.c_str(), strlen(str.c_str()), &dw, NULL);
+	pos.Y+=2;
+	SetConsoleCursorPosition(doubleBuffer[screenIndex], pos);
+	if (gameManager->GetEndMenu()) str = "> Restart       End     ";
+	else str = "  Restart      >End     ";
+	WriteFile(doubleBuffer[screenIndex], str.c_str(), strlen(str.c_str()), &dw, NULL);
+}
+
 void Screen::DrawManual()
 {
 	DWORD dw;
-	pair<short, short> startPos = { centerPos.first + 5,centerPos.second + 14 };
+	pair<short, short> startPos = { centerPos.first + 5,centerPos.second + 12 };
 	for (int i = 0; i < BG.manual.size(); i++) {
 		COORD pos = { startPos.first * 2, startPos.second };
 		SetConsoleCursorPosition(doubleBuffer[screenIndex], pos);
@@ -146,15 +188,38 @@ void Screen::DrawManual()
 	}
 }
 
+void Screen::DrawPause()
+{
+	DWORD dw;
+	COORD pos = { centerPos.first + 9,centerPos.second + 10 };
+	SetConsoleCursorPosition(doubleBuffer[screenIndex], pos);
+	string str = "Pause";
+	WriteFile(doubleBuffer[screenIndex], str.c_str(), strlen(str.c_str()), &dw, NULL);
+}
+
 void Screen::Render()
 {
 	ScreenClear();
-	
-	DrawBackGround();
-	DrawPlayBoard();
-	DrawNextBlock();
-	DrawPlayerInfo();
-	DrawManual();
-
+	switch (gameManager->GetGameState())
+	{
+	case GameState::Intro:
+		DrawIntro();
+		break;
+	case GameState::Play:
+		DrawBackGround();
+		if (game->GetStop())
+			DrawPause();
+		else 
+			DrawPlayBoard();
+		DrawNextBlock();
+		DrawPlayerInfo();
+		DrawManual();
+		break;
+	case GameState::RestartOREnd:
+		DrawROE();
+		break;
+	default:
+		break;
+	}
 	ScreenFlipping();
 }

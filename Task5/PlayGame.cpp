@@ -9,16 +9,17 @@ PlayGame::PlayGame()
 void PlayGame::Initialize()
 {
 	gameState = Starting;
-
+	while (!RandomBag.empty())
+		RandomBag.pop();
 	FillBag();
 	nextBlock = RandomBag.front();
 
 	defaultPos = { 1,4 };
-
+	Pos = defaultPos;
 	board.resize(21);
-	board[20].resize(10, -2);
+	board[20].assign(10, -2);
 	for (int i = 0; i < board.size() - 1; i++) {
-		board[i].resize(10, 8);
+		board[i].assign(10, 8);
 	}
 
 	line = 0;
@@ -33,6 +34,7 @@ void PlayGame::Initialize()
 
 	gameCurrent = clock();
 	gameStart = gameCurrent - gamePeriod;
+	stop = false;
 }
 
 void PlayGame::UpdatePerFrameGame()
