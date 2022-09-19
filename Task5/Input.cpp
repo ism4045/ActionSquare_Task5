@@ -1,113 +1,118 @@
 #include "Input.h"
 
-kbState::kbState(int VK)
+kbState::kbState(int VK, PadState PS)
 {
 	virtualKey = VK;
+	conditionPadState = PS;
+	currentPadState = Nothing;
 	checkBtnIndex = false;
 	for (int i = 0; i < 2; i++) checkBtn[i] = false;
 }
 
-PadState kbState::GetKbState()
+void kbState::UpdatePadState()
 {
 	if (!checkBtn[0]) {
 		if (GetAsyncKeyState(virtualKey) & 0x8000) {
 			checkBtn[checkBtnIndex] = true;
 			checkBtnIndex = true;
-			return PadState::Press;
+			currentPadState = Press;
 		}
 		else {
 			for (int i = 0; i < 2; i++) checkBtn[i] = false;
-			return PadState::Nothing;
+			currentPadState = Nothing;
 		}
 	}
 	else {
 		if (GetAsyncKeyState(virtualKey) & 0x8000) {
 			checkBtn[checkBtnIndex] = true;
-			return PadState::Hold;
+			currentPadState = Hold;
 		}
 		else {
 			for (int i = 0; i < 2; i++) checkBtn[i] = false;
 			checkBtnIndex = false;
-			return PadState::Release;
+			currentPadState = Release;
 		}
 	}
 }
 
+bool kbState::operator<(const kbState& kbs) const
+{
+	if (conditionPadState == kbs.conditionPadState && virtualKey == kbs.virtualKey)
+		return false;
+	return true;
+}
+
 InputManager::InputManager(GameManager& gm)
 {
-	game = gm.PG;
+	playGame = gm.playGame;
 	gameManager = &gm;
 	PlayGameSetInput();
 	IntroSetInput();
 	ROE_SetInput();
 }
 
+InputManager::~InputManager()
+{
+	for (auto iter = playGameMappingKey.begin(); iter != playGameMappingKey.end(); iter++) {
+		delete iter->first;
+	}
+	for (auto iter = introMappingKey.begin(); iter != introMappingKey.end(); iter++) {
+		delete iter->first;
+	}
+	for (auto iter = ROEMappingKey.begin(); iter != ROEMappingKey.end(); iter++) {
+		delete iter->first;
+	}
+}
+
 void InputManager::PlayGameSetInput()
 {
-	playGameMappingKey.insert(make_pair(make_pair(VK_ESCAPE, Press), &PlayGame::Stop));
-	playGameMappingKey.insert(make_pair(make_pair(VK_LEFT, Press), &PlayGame::MoveL));
-	playGameMappingKey.insert(make_pair(make_pair(VK_RIGHT, Press), &PlayGame::MoveR));
-	playGameMappingKey.insert(make_pair(make_pair(VK_DOWN, Hold), &PlayGame::ChangeSoftDrop));
-	playGameMappingKey.insert(make_pair(make_pair(VK_DOWN, Release), &PlayGame::ReturnNormalSpeed));
-	playGameMappingKey.insert(make_pair(make_pair(VK_UP, Press), &PlayGame::RotateBlock));
-	playGameMappingKey.insert(make_pair(make_pair(VK_SPACE, Press), &PlayGame::DoHardDrop));
-	playGameCheckKeyState.insert(make_pair(VK_ESCAPE, new kbState(VK_ESCAPE)));
-	playGameCheckKeyState.insert(make_pair(VK_LEFT, new kbState(VK_LEFT)));
-	playGameCheckKeyState.insert(make_pair(VK_RIGHT, new kbState(VK_RIGHT)));
-	playGameCheckKeyState.insert(make_pair(VK_DOWN, new kbState(VK_DOWN)));
-	playGameCheckKeyState.insert(make_pair(VK_UP, new kbState(VK_UP)));
-	playGameCheckKeyState.insert(make_pair(VK_SPACE, new kbState(VK_SPACE)));
+	playGameMappingKey.insert(make_pair(new kbState(VK_ESCAPE,Press), &PlayGame::Stop));
+	playGameMappingKey.insert(make_pair(new kbState(VK_LEFT, Press), &PlayGame::MoveL));
+	playGameMappingKey.insert(make_pair(new kbState(VK_RIGHT, Press), &PlayGame::MoveR));
+	playGameMappingKey.insert(make_pair(new kbState(VK_DOWN, Hold), &PlayGame::ChangeSoftDrop));
+	playGameMappingKey.insert(make_pair(new kbState(VK_DOWN, Release), &PlayGame::ReturnNormalSpeed));
+	playGameMappingKey.insert(make_pair(new kbState(VK_UP, Press), &PlayGame::RotateBlock));
+	playGameMappingKey.insert(make_pair(new kbState(VK_SPACE, Press), &PlayGame::DoHardDrop));
 }
 
 void InputManager::PlayGameInput()
 {
-	if (_kbhit()) {
-		for (auto iter = playGameMappingKey.begin(); iter != playGameMappingKey.end(); iter++) {
-			if (playGameCheckKeyState[iter->first.first]->GetKbState() == iter->first.second) {
-				if (iter->second == &PlayGame::Stop)
-					(game->*(iter->second))();
-				else 
-					if (!game->GetStop())
-						(game->*(iter->second))();
-			}
+	for (auto iter = playGameMappingKey.begin(); iter != playGameMappingKey.end(); iter++) {
+		iter->first->UpdatePadState();
+		if (iter->first->CanDoFunction()) {
+			(playGame->*(iter->second))();
 		}
 	}
 }
 
 void InputManager::IntroSetInput()
 {
-	introMappingKey.insert(make_pair(make_pair(VK_RETURN, Press), &GameManager::EnterPlay));
-	introCheckKeyState.insert(make_pair(VK_RETURN, new kbState(VK_RETURN)));
+	introMappingKey.insert(make_pair(new kbState(VK_RETURN, Press), &GameManager::EnterPlay));
 }
 
 void InputManager::IntroInput()
 {
-	if (_kbhit()) {
-		for (auto iter = introMappingKey.begin(); iter != introMappingKey.end(); iter++) {
-			if (introCheckKeyState[iter->first.first]->GetKbState() == iter->first.second) {
-				(gameManager->*(iter->second))();
-			}
+	for (auto iter = introMappingKey.begin(); iter != introMappingKey.end(); iter++) {
+		iter->first->UpdatePadState();
+		if (iter->first->CanDoFunction()) {
+			(gameManager->*(iter->second))();
 		}
 	}
 }
 
 void InputManager::ROE_SetInput()
 {
-	ROEMappingKey.insert(make_pair(make_pair(VK_LEFT, Press), &GameManager::SelectROE_L));
-	ROEMappingKey.insert(make_pair(make_pair(VK_RIGHT, Press), &GameManager::SelectROE_R));
-	ROEMappingKey.insert(make_pair(make_pair(VK_RETURN, Press), &GameManager::DecisionEnd));
-	ROECheckKeyState.insert(make_pair(VK_RETURN, new kbState(VK_RETURN)));
-	ROECheckKeyState.insert(make_pair(VK_LEFT, new kbState(VK_LEFT)));
-	ROECheckKeyState.insert(make_pair(VK_RIGHT, new kbState(VK_RIGHT)));
+	ROEMappingKey.insert(make_pair(new kbState(VK_LEFT, Press), &GameManager::SelectROE_L));
+	ROEMappingKey.insert(make_pair(new kbState(VK_RIGHT, Press), &GameManager::SelectROE_R));
+	ROEMappingKey.insert(make_pair(new kbState(VK_RETURN, Press), &GameManager::DecisionEnd));
 }
 
 void InputManager::ROE_Input()
 {
-	if (_kbhit()) {
-		for (auto iter = ROEMappingKey.begin(); iter != ROEMappingKey.end(); iter++) {
-			if (ROECheckKeyState[iter->first.first]->GetKbState() == iter->first.second) {
-				(gameManager->*(iter->second))();
-			}
+	for (auto iter = ROEMappingKey.begin(); iter != ROEMappingKey.end(); iter++) {
+		iter->first->UpdatePadState();
+		if (iter->first->CanDoFunction()) {
+			(gameManager->*(iter->second))();
 		}
 	}
 }
@@ -122,7 +127,7 @@ void InputManager::Input()
 	case GameState::Play:
 		PlayGameInput();
 		break;
-	case GameState::RestartOREnd:
+	case GameState::RestartOrEnd:
 		ROE_Input();
 		break;
 	default:

@@ -1,18 +1,24 @@
 #pragma once
 #include "PlayGame.h"
-
+#include <iostream>
+#include <vector>
+#include <string>
+#include <Windows.h>
+#include <mmsystem.h>
+#include <mciapi.h>
+#pragma comment(lib,"winmm.lib")
 enum GameState
 {
 	Intro,
 	Play,
-	RestartOREnd,
+	RestartOrEnd,
 	End
 };
 
 class GameManager {
 public: 
-	PlayGame* PG;
-	GameManager(PlayGame& pg);
+	PlayGame* playGame;
+	GameManager();
 	void Initialize();
 
 	void EnterPlay();

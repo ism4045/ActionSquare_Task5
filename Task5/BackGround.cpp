@@ -75,13 +75,10 @@ void BackGround::makeManual()
 
 void BackGround::makeIntroBox()
 {
-	introStr.push_back("          이호성의 테트리스           ");
+	introStr.push_back("             T E T R I S              ");
 	introStr.push_back("                                      ");
 	introStr.push_back("    Press Enter key to play Tetris    ");
 	introStr.push_back("                                      ");
 	introStr.push_back("                                      ");
-	introStr.push_back("    UI Developer    : Lee Ho Seoung   ");
-	introStr.push_back("    Logic Developer : Lee Ho Seoung   ");
-	introStr.push_back("    Input Developer : Lee Ho Seoung   ");
-	introStr.push_back("    Director        : Lee Ho Seoung   ");
+	introStr.push_back("      Developer : Lee Ho Seoung       ");
 }

@@ -1,6 +1,10 @@
 #include "PlayGame.h"
-#include <ctime>
-#include <map>
+
+#define ROCK_DELEY 500.0
+#define DEFAULTPOS {1,4}
+#define FLOOR -2
+#define BLANK 8
+#define PREVIEWBLOCK 9
 PlayGame::PlayGame()
 {
 	Initialize();
@@ -8,18 +12,18 @@ PlayGame::PlayGame()
 
 void PlayGame::Initialize()
 {
-	gameState = Starting;
+	playGameState = Starting;
+
 	while (!RandomBag.empty())
 		RandomBag.pop();
 	FillBag();
 	nextBlock = RandomBag.front();
 
-	defaultPos = { 1,4 };
-	Pos = defaultPos;
+	Pos = DEFAULTPOS;
 	board.resize(21);
-	board[20].assign(10, -2);
+	board[20].assign(10, FLOOR);
 	for (int i = 0; i < board.size() - 1; i++) {
-		board[i].assign(10, 8);
+		board[i].assign(10, BLANK);
 	}
 
 	line = 0;
@@ -35,52 +39,56 @@ void PlayGame::Initialize()
 	gameCurrent = clock();
 	gameStart = gameCurrent - gamePeriod;
 	stop = false;
+
+	mciSendString(TEXT("open Move.mp3 type mpegvideo alias move"), NULL, 0, NULL);
+	mciSendString(TEXT("open LineClear.mp3 type mpegvideo alias lineclear"), NULL, 0, NULL);
+	mciSendString(TEXT("setaudio move volume to 300"), NULL, 0, NULL);
+	mciSendString(TEXT("setaudio lineclear volume to 100"), NULL, 0, NULL);
 }
 
 void PlayGame::UpdatePerFrameGame()
 {
-	if (gameState == Starting) {
+	if (playGameState == Starting) {
 		SpawnBlock();
-		if (gameState == GameOver) return; 
-
-		CheckSetWaiting();
-		if (gameState == Waiting) return;
-		else
-			gameState = Falling;
-		gamePeriod = 1000.0 / processSpeed;
+		if (playGameState == GameOver) return; 
 	}
-	else if (gameState == Falling) {
-		CheckSetWaiting();
-		if (gameState == Waiting) return;
-		gamePeriod = 1000.0 / processSpeed;
-		for (int i = 0; i < currentBlock.tileInfo.size(); i++) {
-			int tileX = Pos.first + currentBlock.tileInfo[i].X;
-			int tileY = Pos.second + currentBlock.tileInfo[i].Y;
-			if (tileX >= 0) {
-				board[tileX][tileY] = 8;
-			}
-		}
+	else if (playGameState == Falling) {
+		RemoveCurrentBlock();
 		Pos.first++;
 		SetPreviewBlock();
-		UpdatePlayerBlock();
-		CheckSetWaiting();
+		UpdateCurrentBlock();
+	}
+}
+
+void PlayGame::UpdateState()
+{
+	if (!CanFall(Pos)) {
+		playGameState = Waiting;
+		gamePeriod = ROCK_DELEY;
+	}
+	else {
+		playGameState = Falling;
+		gamePeriod = 1000.0 / processSpeed;
 	}
 }
 
 void PlayGame::Update()
 {
-	if (!stop) gameCurrent = clock();
+	if (!stop) {
+		gameCurrent = clock();
+		UpdateState();
+	}
 	if ((double)gameCurrent - (double)gameStart >= gamePeriod && !stop) {
-		if (gameState == Waiting) {
-			if (!CanFall()) {
+		if (playGameState == Waiting) {
+			if (!CanFall(Pos)) {
 				CheckCompleteLine();
 				levelSpeed = level + 1;
 				processSpeed = levelSpeed;
 				softDropSpeed = levelSpeed + 10;
-				gameState = Starting;
+				playGameState = Starting;
 			}
 			else {
-				gameState = Falling;
+				playGameState = Falling;
 			}
 		}
 		UpdatePerFrameGame();
@@ -101,7 +109,7 @@ void PlayGame::FillBag()
 
 void PlayGame::SpawnBlock()
 {
-	Pos = defaultPos;
+	Pos = DEFAULTPOS;
 	currentRotate = 0;
 	currentBlock = nextBlock;
 
@@ -110,10 +118,11 @@ void PlayGame::SpawnBlock()
 	nextBlock = RandomBag.front();
 
 	if (!CanProcess()) Pos.first = 0;
-	if (!CanProcess()) gameState = GameOver;
+	if (!CanProcess()) 
+		playGameState = GameOver;
 	else {
 		SetPreviewBlock();
-		UpdatePlayerBlock();
+		UpdateCurrentBlock();
 	}
 
 	
@@ -121,38 +130,28 @@ void PlayGame::SpawnBlock()
 
 void PlayGame::MoveL()
 {
-	if (gameState != Starting) {
+	if (!stop) {
 		if (CanMoveL()) {
-			for (int i = 0; i < currentBlock.tileInfo.size(); i++) {
-				int tileX = Pos.first + currentBlock.tileInfo[i].X;
-				int tileY = Pos.second + currentBlock.tileInfo[i].Y;
-				if (tileX >= 0) {
-					board[tileX][tileY] = 8;
-				}
-			}
+			RemoveCurrentBlock();
 			Pos.second--;
 			SetPreviewBlock();
-			UpdatePlayerBlock();
-			CheckSetWaiting();
+			UpdateCurrentBlock();
+			mciSendString(TEXT("seek move notify to start"), NULL, 0, NULL);
+			mciSendString(TEXT("play move"), NULL, 0, NULL);
 		}
 	}
 }
 
 void PlayGame::MoveR()
 {
-	if (gameState != Starting) {
+	if (!stop) {
 		if (CanMoveR()) {
-			for (int i = 0; i < currentBlock.tileInfo.size(); i++) {
-				int tileX = Pos.first + currentBlock.tileInfo[i].X;
-				int tileY = Pos.second + currentBlock.tileInfo[i].Y;
-				if (tileX >= 0) {
-					board[tileX][tileY] = 8;
-				}
-			}
+			RemoveCurrentBlock();
 			Pos.second++;
 			SetPreviewBlock();
-			UpdatePlayerBlock();
-			CheckSetWaiting();
+			UpdateCurrentBlock();
+			mciSendString(TEXT("seek move notify to start"), NULL, 0, NULL);
+			mciSendString(TEXT("play move"), NULL, 0, NULL);
 		}
 	}
 }
@@ -161,25 +160,22 @@ void PlayGame::RotateBlock()
 {
 	int moveX = 0;
 	int moveY = 0;
-	if (CanRotate(moveX, moveY)) {
-		for (int i = 0; i < currentBlock.tileInfo.size(); i++) {
-			int tileX = Pos.first + currentBlock.tileInfo[i].X;
-			int tileY = Pos.second + currentBlock.tileInfo[i].Y;
-			if (tileX >= 0) {
-				board[tileX][tileY] = 8;
-			}
+	if (!stop) {
+		if (CanRotate(moveX, moveY)) {
+			RemoveCurrentBlock();
+			currentBlock.rotateBlock();
+			currentRotate = currentRotate == 3 ? 0 : currentRotate + 1;
+			Pos.first = moveX;
+			Pos.second = moveY;
+			SetPreviewBlock();
+			UpdateCurrentBlock();
+			mciSendString(TEXT("seek move notify to start"), NULL, 0, NULL);
+			mciSendString(TEXT("play move"), NULL, 0, NULL);
 		}
-		currentBlock.rotateBlock();
-		currentRotate = currentRotate == 3 ? 0 : currentRotate + 1;
-		Pos.first = moveX;
-		Pos.second = moveY;
-		SetPreviewBlock();
-		UpdatePlayerBlock();
-		CheckSetWaiting();
 	}
 }
 
-void PlayGame::UpdatePlayerBlock()
+void PlayGame::UpdateCurrentBlock()
 {
 	for (int i = 0; i < currentBlock.tileInfo.size(); i++) {
 		int tileX = Pos.first + currentBlock.tileInfo[i].X;
@@ -190,24 +186,34 @@ void PlayGame::UpdatePlayerBlock()
 	}
 }
 
+void PlayGame::RemoveCurrentBlock()
+{
+	for (int i = 0; i < currentBlock.tileInfo.size(); i++) {
+		int tileX = Pos.first + currentBlock.tileInfo[i].X;
+		int tileY = Pos.second + currentBlock.tileInfo[i].Y;
+		if (tileX >= 0) {
+			board[tileX][tileY] = BLANK;
+		}
+	}
+}
+
 void PlayGame::CheckCompleteLine()
 {
 	vector<int> removeLine;
 	for (int i = 0; i <board.size()-1; i++) {
 		int isComplete = true;
 		for (int j = 0; j < board[i].size(); j++) {
-			if (board[i][j] == 8) {
+			if (board[i][j] == BLANK) {
 				isComplete = false;
 				break;
 			}
 		}
 		if (isComplete) {
-			board[i].assign(10, 8);
+			board[i].assign(10, BLANK);
 			removeLine.push_back(i);
 		}
 	}
 	if (!removeLine.empty()) {
-
 		CalculateInfo((int)removeLine.size());
 
 		for (int i = 0; i < removeLine.size(); i++) {
@@ -215,9 +221,11 @@ void PlayGame::CheckCompleteLine()
 			for (int j = temp; j >= 1; j--) {
 				board[j] = board[j-1];
 			}
-			board[0].assign(10, 8);
+			board[0].assign(10, BLANK);
 		}
 		removeLine.clear();
+		mciSendString(TEXT("seek lineclear notify to start"), NULL, 0, NULL);
+		mciSendString(TEXT("play lineclear"), NULL, 0, NULL);
 	}
 }
 
@@ -231,14 +239,7 @@ void PlayGame::CalculateInfo(int clearLineNum) {
 	level = line / 10;
 }
 
-void PlayGame::CheckSetWaiting()
-{
-	if (!CanFall()) {
-		gameState = Waiting;
-		gamePeriod = 500.0;
-	}
-	else gameState = Falling;
-}
+
 
 void PlayGame::Stop()
 {
@@ -252,7 +253,7 @@ void PlayGame::Stop()
 
 void PlayGame::ChangeSoftDrop()
 {
-	if (CanFall()) {
+	if (CanFall(Pos)) {
 		processSpeed = softDropSpeed;
 		gamePeriod = 1000.0 / processSpeed;
 	}
@@ -266,62 +267,32 @@ void PlayGame::ReturnNormalSpeed()
 
 void PlayGame::DoHardDrop()
 {
-	if (gameState != GameOver) {
-		while (CanFall())
-		{
-			for (int i = 0; i < currentBlock.tileInfo.size(); i++) {
-				int tileX = Pos.first + currentBlock.tileInfo[i].X;
-				int tileY = Pos.second + currentBlock.tileInfo[i].Y;
-				if (tileX >= 0) {
-					board[tileX][tileY] = 8;
-				}
-			}
+	if (!stop) {
+		RemoveCurrentBlock();
+		while (CanFall(Pos))
 			Pos.first++;
-			UpdatePlayerBlock();
-		}
-		CheckCompleteLine();
-		levelSpeed = level + 1;
-		softDropSpeed = levelSpeed + 10;
-		processSpeed = levelSpeed;
-		gameState = Waiting;
-		gamePeriod = 0.0;
+		UpdateCurrentBlock();
+		gameStart = gameCurrent - ROCK_DELEY;
 	}
 }
 
 void PlayGame::SetPreviewBlock()
 {
 	pair<int, int> tempPos = Pos;
-	while (1)
+	while (CanFall(tempPos))
 	{
-		map<int, int> shouldCheckTile;
-		for (int i = 0; i < currentBlock.tileInfo.size(); i++) {
-			int tileX = tempPos.first + currentBlock.tileInfo[i].X;
-			int tileY = tempPos.second + currentBlock.tileInfo[i].Y;
-			if (shouldCheckTile.find(tileY) != shouldCheckTile.end()) {
-				if (shouldCheckTile[tileY] < tileX) shouldCheckTile[tileY] = tileX;
-			}
-			else shouldCheckTile[tileY] = tileX;
-		}
-		bool canFall = true;
-		for (auto iter = shouldCheckTile.begin(); iter != shouldCheckTile.end(); iter++) {
-			if (board[(iter->second) + 1][iter->first] != 8 && board[(iter->second) + 1][iter->first] != 9) {
-				canFall = false;
-				break;
-			}
-		}
-		if (!canFall) break;
 		tempPos.first++;
 	}
 	for (int i = 0; i < board.size(); i++) {
 		for (int j = 0; j < board[i].size(); j++) {
-			if (board[i][j] == 9) board[i][j] = 8;
+			if (board[i][j] == PREVIEWBLOCK) board[i][j] = BLANK;
 		}
 	}
 	for (int i = 0; i < currentBlock.tileInfo.size(); i++) {
 		int tileX = tempPos.first + currentBlock.tileInfo[i].X;
 		int tileY = tempPos.second + currentBlock.tileInfo[i].Y;
 		if (tileX >= 0) {
-			board[tileX][tileY] = 9;
+			board[tileX][tileY] = PREVIEWBLOCK;
 		}
 	}
 }
@@ -332,7 +303,7 @@ bool PlayGame::CanProcess()
 		int tileX = Pos.first + currentBlock.tileInfo[i].X;
 		int tileY = Pos.second + currentBlock.tileInfo[i].Y;
 		if (tileX >= 0 && tileY >= 0 && tileY < 10) {
-			if (board[tileX][tileY] != 8 && board[tileX][tileY] != 9) {
+			if (board[tileX][tileY] != BLANK && board[tileX][tileY] != PREVIEWBLOCK) {
 				return false;
 			}
 		}
@@ -340,12 +311,12 @@ bool PlayGame::CanProcess()
 	return true;
 }
 
-bool PlayGame::CanFall()
+bool PlayGame::CanFall(pair<int, int> p)
 {
 	map<int, int> shouldCheckTile;
 	for (int i = 0; i < currentBlock.tileInfo.size(); i++) {
-		int tileX = Pos.first + currentBlock.tileInfo[i].X;
-		int tileY = Pos.second + currentBlock.tileInfo[i].Y;
+		int tileX = p.first + currentBlock.tileInfo[i].X;
+		int tileY = p.second + currentBlock.tileInfo[i].Y;
 		if (shouldCheckTile.find(tileY) != shouldCheckTile.end()) {
 			if (shouldCheckTile[tileY] < tileX) shouldCheckTile[tileY] = tileX;
 		}
@@ -353,7 +324,7 @@ bool PlayGame::CanFall()
 	}
 
 	for (auto iter = shouldCheckTile.begin(); iter != shouldCheckTile.end(); iter++) {
-		if (board[(iter->second) + 1][iter->first] != 8 && board[(iter->second) + 1][iter->first] != 9) {
+		if (board[(iter->second) + 1][iter->first] != BLANK && board[(iter->second) + 1][iter->first] != PREVIEWBLOCK) {
 			return false;
 		}
 	}
@@ -379,7 +350,7 @@ bool PlayGame::CanMoveL()
 		int posY;
 		posY = iter->second - 1;
 		if (iter->first < 0 || posY < 0 || posY >= 10) return false;
-		else if (board[iter->first][posY] != 8 && board[iter->first][posY] != 9) {
+		else if (board[iter->first][posY] != BLANK && board[iter->first][posY] != PREVIEWBLOCK) {
 			return false;
 		}
 	}
@@ -405,7 +376,7 @@ bool PlayGame::CanMoveR()
 		int posY;
 		posY = iter->second + 1;
 		if (iter->first < 0 || posY < 0 || posY >= 10) return false;
-		else if (board[iter->first][posY] != 8 && board[iter->first][posY] != 9) {
+		else if (board[iter->first][posY] != BLANK && board[iter->first][posY] != PREVIEWBLOCK) {
 			return false;
 		}
 	}
@@ -420,7 +391,7 @@ bool PlayGame::CanRotate(int& moveX, int& moveY)
 		int tileX = Pos.first + currentBlock.tileInfo[i].X;
 		int tileY = Pos.second + currentBlock.tileInfo[i].Y;
 		if (tileX >= 0) {
-			tempBoard[tileX][tileY] = 8;
+			tempBoard[tileX][tileY] = BLANK;
 		}
 	}
 	tempBlock.rotateBlock();
@@ -433,7 +404,7 @@ bool PlayGame::CanRotate(int& moveX, int& moveY)
 		for (int j = 0; j < tempBlock.tileInfo.size(); j++) {
 			int tempTileX = tempX + tempBlock.tileInfo[j].X;
 			int tempTileY = tempY + tempBlock.tileInfo[j].Y;
-			if (tempTileX < 0 || tempTileY < 0 || tempTileX >= 20 || tempTileY >= 10 || (tempBoard[tempTileX][tempTileY] != 8 && tempBoard[tempTileX][tempTileY] != 9)) {
+			if (tempTileX < 0 || tempTileY < 0 || tempTileX >= 20 || tempTileY >= 10 || (tempBoard[tempTileX][tempTileY] != BLANK && tempBoard[tempTileX][tempTileY] != PREVIEWBLOCK)) {
 				CanRotate = false;
 				break;
 			}

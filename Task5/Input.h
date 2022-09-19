@@ -15,23 +15,23 @@ enum PadState {
 
 class kbState {
 	friend class InputManager;
-	kbState(int VK);
-	PadState GetKbState();
+	kbState(int VK, PadState PS);
+	bool CanDoFunction() { return conditionPadState == currentPadState; }
+	void UpdatePadState();
+	bool operator<(const kbState& kbs) const;
+
 private:
 	int virtualKey;
+	PadState conditionPadState;
+	PadState currentPadState;
 	bool checkBtn[2];
 	bool checkBtnIndex;
-};
-
-struct MappingKey
-{
-	map<pair<int, PadState>, void (PlayGame::*)()> mappingKey;
-	map<int, kbState*> checkKeyState;
 };
 
 class InputManager {
 public:
 	InputManager(GameManager& gm);
+	~InputManager();
 
 	void PlayGameInput();
 	void PlayGameSetInput();
@@ -44,12 +44,10 @@ public:
 
 	void Input();
 private:
-	map<pair<int, PadState>, void (PlayGame::*)()> playGameMappingKey;
-	map<int, kbState*> playGameCheckKeyState;
-	map<pair<int, PadState>, void (GameManager::*)()> introMappingKey;
-	map<int, kbState*> introCheckKeyState;
-	map<pair<int, PadState>, void (GameManager::*)()> ROEMappingKey;
-	map<int, kbState*> ROECheckKeyState;
-	PlayGame *game;
+	map<kbState*, void (PlayGame::*)()> playGameMappingKey;
+	map<kbState*, void (GameManager::*)()> introMappingKey;
+	map<kbState*, void (GameManager::*)()> ROEMappingKey;
+
+	PlayGame *playGame;
 	GameManager* gameManager;
 };

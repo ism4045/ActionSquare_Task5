@@ -35,7 +35,6 @@ public:
 
 private:
 	BackGround BG;
-	PlayGame* game;
 	GameManager* gameManager;
 	bool screenIndex;
 	HANDLE doubleBuffer[2];

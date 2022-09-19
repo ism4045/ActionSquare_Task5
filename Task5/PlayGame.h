@@ -1,10 +1,16 @@
 #pragma once
+#include "Block.h"
 #include <vector>
 #include <iostream>
 #include <conio.h>
 #include <map>
 #include <queue>
-#include "Block.h"
+#include <ctime>
+#include <string>
+#include <Windows.h>
+#include <mmsystem.h>
+#include <mciapi.h>
+#pragma comment(lib,"winmm.lib")
 using namespace std;
 
 enum PlayGameState {
@@ -21,6 +27,7 @@ public:
 	void Initialize();
 
 	void UpdatePerFrameGame();
+	void UpdateState();
 	void Update();
 
 	void FillBag();
@@ -29,19 +36,20 @@ public:
 	void MoveL();
 	void MoveR();
 	void RotateBlock();
-	void UpdatePlayerBlock();
 	void Stop();
 	void ChangeSoftDrop();
 	void ReturnNormalSpeed();
 	void DoHardDrop();
+
+	void UpdateCurrentBlock();
+	void RemoveCurrentBlock();
 	void SetPreviewBlock();
 
 	void CheckCompleteLine();
 	void CalculateInfo(int clearLineNum);
-	void CheckSetWaiting();
 
 	bool CanProcess();
-	bool CanFall();
+	bool CanFall(pair<int,int> p);
 	bool CanMoveL();
 	bool CanMoveR();
 	bool CanRotate(int& moveX, int& moveY);
@@ -50,22 +58,20 @@ public:
 	int GetLevel() { return level; }
 	int GetScore() { return score; }
 	bool GetStop() { return stop; }
-	PlayGameState GetPlayGameState() { return gameState; }
+	PlayGameState GetPlayGameState() { return playGameState; }
 	Block GetNextBlock() { return nextBlock; }
 	vector<vector<int>> GetBoard() { return board; }
 
 private:
 	vector<vector<int>> board;
 
-	PlayGameState gameState;
+	PlayGameState playGameState;
 
 	Block nextBlock;
 	queue<Block> RandomBag;
 
 	Block currentBlock;
 	int currentRotate;
-
-	pair<int, int> defaultPos;
 	pair<int, int> Pos;
 
 	int line;

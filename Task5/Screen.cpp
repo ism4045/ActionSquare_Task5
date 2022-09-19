@@ -1,4 +1,23 @@
 #include "Screen.h"
+#define CENTERPOS {20,3}
+Screen::Screen(GameManager& gm)
+{
+	gameManager = &gm;
+	CONSOLE_CURSOR_INFO cci;
+
+	doubleBuffer[0] = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
+	doubleBuffer[1] = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
+
+	cci.dwSize = 1;
+	cci.bVisible = FALSE;
+	SetConsoleCursorInfo(doubleBuffer[0], &cci);
+	SetConsoleCursorInfo(doubleBuffer[1], &cci);
+
+	screenIndex = true;
+	centerPos = CENTERPOS;
+	introStart = clock();
+	blink = false;
+}
 
 void Screen::TextColor(int foreGround, int backGround) {
 	int color = foreGround + backGround * 16;
@@ -17,26 +36,6 @@ void Screen::DecisionBlockColor(int blockType) {
 }
 
 void Screen::ResetColor() { TextColor(15, 0); }
-
-Screen::Screen(GameManager& gm)
-{
-	game = gm.PG;
-	gameManager = &gm;
-	CONSOLE_CURSOR_INFO cci;
-
-	doubleBuffer[0] = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
-	doubleBuffer[1] = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
-
-	cci.dwSize = 1;
-	cci.bVisible = FALSE;
-	SetConsoleCursorInfo(doubleBuffer[0], &cci);
-	SetConsoleCursorInfo(doubleBuffer[1], &cci);
-
-	screenIndex = true;
-	centerPos = { 20,3 };
-	introStart = clock();
-	blink = false;
-}
 
 void Screen::ScreenFlipping()
 {
@@ -102,7 +101,7 @@ void Screen::DrawBackGround()
 
 void Screen::DrawPlayBoard() {
 	DWORD dw;
-	vector<vector<int>> tempBoard = game->GetBoard();
+	vector<vector<int>> tempBoard = gameManager->playGame->GetBoard();
 	pair<short, short> startPos = { centerPos.first+2,centerPos.second+1 };
 	for (int i = 0; i < tempBoard.size()-1; i++) {
 		for (int j = 0; j < tempBoard[i].size(); j++) {
@@ -126,7 +125,7 @@ void Screen::DrawPlayBoard() {
 
 void Screen::DrawNextBlock() {
 	DWORD dw;
-	Block tempNextBlock = game->GetNextBlock();
+	Block tempNextBlock = gameManager->playGame->GetNextBlock();
 	pair<short, short> startPos = { centerPos.first+32,centerPos.second+2 };
 	for (int j = 0; j < tempNextBlock.tileInfo.size(); j++) {
 		COORD pos = { startPos.first + (short)tempNextBlock.tileInfo[j].Y * 2,startPos.second + (short)tempNextBlock.tileInfo[j].X };
@@ -141,9 +140,9 @@ void Screen::DrawNextBlock() {
 
 void Screen::DrawPlayerInfo()
 {
-	int tempLevel = game->GetLevel();
-	int templine = game->GetLine();
-	int tempScore = game->GetScore();
+	int tempLevel = gameManager->playGame->GetLevel();
+	int templine = gameManager->playGame->GetLine();
+	int tempScore = gameManager->playGame->GetScore();
 	DWORD dw;
 	pair<short, short> startPos = { centerPos.first + 5,centerPos.second +6 };
 	COORD pos = { startPos.first * 2, startPos.second };
@@ -171,7 +170,7 @@ void Screen::DrawROE()
 	pos.Y+=2;
 	SetConsoleCursorPosition(doubleBuffer[screenIndex], pos);
 	if (gameManager->GetEndMenu()) str = "> Restart       End     ";
-	else str = "  Restart      >End     ";
+	else str = "  Restart     > End     ";
 	WriteFile(doubleBuffer[screenIndex], str.c_str(), strlen(str.c_str()), &dw, NULL);
 }
 
@@ -207,7 +206,7 @@ void Screen::Render()
 		break;
 	case GameState::Play:
 		DrawBackGround();
-		if (game->GetStop())
+		if (gameManager->playGame->GetStop())
 			DrawPause();
 		else 
 			DrawPlayBoard();
@@ -215,7 +214,7 @@ void Screen::Render()
 		DrawPlayerInfo();
 		DrawManual();
 		break;
-	case GameState::RestartOREnd:
+	case GameState::RestartOrEnd:
 		DrawROE();
 		break;
 	default:
