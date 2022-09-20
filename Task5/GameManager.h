@@ -15,11 +15,9 @@ enum GameState
 	End
 };
 
-class GameManager {
+class GameManager : public PlayGame {
 public: 
-	PlayGame* playGame;
 	GameManager();
-	void Initialize();
 
 	void EnterPlay();
 
@@ -27,7 +25,7 @@ public:
 	void SelectROE_R();
 	void DecisionEnd();
 
-	void Update();
+	void GameUpdate();
 	GameState GetGameState() { return gameState; }
 	bool GetEndMenu() { return endMenu; }
 private:

@@ -140,14 +140,14 @@ void Block::rotateBlock()
 	for (int i = 0; i < tileInfo.size(); i++) {
 		if (tileInfo[i].X == 0 || tileInfo[i].Y == 0) {
 			if (tileInfo[i].Y == 0) {
-				tileInfo[i].X = tileInfo[i].X - 2 * tileInfo[i].X;
+				tileInfo[i].X = -tileInfo[i].X;
 			}
 			swap(tileInfo[i].X, tileInfo[i].Y);
 		}
 		else if ((tileInfo[i].X < 0 && tileInfo[i].Y < 0) || (tileInfo[i].X > 0 && tileInfo[i].Y > 0)) 
-			tileInfo[i].Y = tileInfo[i].Y - 2 * tileInfo[i].Y;
+			tileInfo[i].Y = -tileInfo[i].Y;
 		else 
-			tileInfo[i].X = tileInfo[i].X - 2 * tileInfo[i].X;
+			tileInfo[i].X = -tileInfo[i].X;
 	}
 }
 

@@ -2,13 +2,15 @@
 
 BackGround::BackGround()
 {
-	makePlayBox();
-	makeNextBox();
-	makeManual();
-	makeIntroBox();
+	MakePlayBox();
+	MakeNextBox();
+	MakeManual();
+	MakeIntro();
+	MakeROE();
+	MakeInfo();
 }
 
-void BackGround::makePlayBox() {
+void BackGround::MakePlayBox() {
 	playBox.resize(22);
 	for (int i = 0; i < playBox.size(); i++) {
 		if (i == 0) {
@@ -32,7 +34,7 @@ void BackGround::makePlayBox() {
 	}
 }
 
-void BackGround::makeNextBox() {
+void BackGround::MakeNextBox() {
 	nextBox.resize(5);
 	for (int i = 0; i < nextBox.size(); i++) {
 		if (i == 0) {
@@ -64,16 +66,20 @@ void BackGround::makeNextBox() {
 	}
 }
 
-void BackGround::makeManual()
+void BackGround::MakeManual()
 {
-	manual.push_back("¡ç¡æ : Move Left Right");
+	manual.push_back("¡ç¡æ : Move Left Right     ");
+	manual.push_back("                           ");
 	manual.push_back("¡è : Rotate Clock Direction");
-	manual.push_back("¡é : Soft Drop");
-	manual.push_back("Space : Hard Drop");
-	manual.push_back("Esc : Pause");
+	manual.push_back("                           ");
+	manual.push_back("¡é : Soft Drop             ");
+	manual.push_back("                           ");
+	manual.push_back("Space : Hard Drop          ");
+	manual.push_back("                           ");
+	manual.push_back("Esc : Pause                ");
 }
 
-void BackGround::makeIntroBox()
+void BackGround::MakeIntro()
 {
 	introStr.push_back("             T E T R I S              ");
 	introStr.push_back("                                      ");
@@ -81,4 +87,21 @@ void BackGround::makeIntroBox()
 	introStr.push_back("                                      ");
 	introStr.push_back("                                      ");
 	introStr.push_back("      Developer : Lee Ho Seoung       ");
+}
+
+void BackGround::MakeROE()
+{
+	ROEStr.push_back("      Game Over     ");
+	ROEStr.push_back("                    ");
+	ROEStr.push_back("> Restart       End ");
+	ROEStr.push_back("  Restart     > End ");
+}
+
+void BackGround::MakeInfo()
+{
+	infoStr.push_back("Level : ");
+	infoStr.push_back("        ");
+	infoStr.push_back("Line  : ");
+	infoStr.push_back("        ");
+	infoStr.push_back("Score : ");
 }

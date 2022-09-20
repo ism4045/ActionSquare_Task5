@@ -25,6 +25,8 @@ public:
 	void DrawNextBlock();
 	void DrawPlayerInfo();
 
+	void Draw2DVector(vector<vector<string>> arr, pair<short, short> startPos);
+	void Draw1DVector(vector<string> arr, pair<short, short> startPos);
 	void DrawROE();
 
 	void Render();
@@ -36,10 +38,10 @@ public:
 private:
 	BackGround BG;
 	GameManager* gameManager;
+
 	bool screenIndex;
 	HANDLE doubleBuffer[2];
-
-	pair<int, int> centerPos;
+	DWORD dw;
 
 	clock_t introStart;
 	clock_t introCurrent;

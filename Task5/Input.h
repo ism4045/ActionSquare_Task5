@@ -3,7 +3,6 @@
 #include <iostream>
 #include <conio.h>
 #include <map>
-#include "PlayGame.h"
 #include "GameManager.h"
 using namespace std;
 enum PadState {
@@ -33,19 +32,16 @@ public:
 	InputManager(GameManager& gm);
 	~InputManager();
 
-	void PlayGameInput();
 	void PlayGameSetInput();
-
-	void IntroInput();
 	void IntroSetInput();
-
-	void ROE_Input();
 	void ROE_SetInput();
 
+	template<class T>
+	void CheckInput(map<kbState*, void(T::*)()> mappingKey);
 	void Input();
 private:
-	map<kbState*, void (PlayGame::*)()> playGameMappingKey;
 	map<kbState*, void (GameManager::*)()> introMappingKey;
+	map<kbState*, void (PlayGame::*)()> playGameMappingKey;
 	map<kbState*, void (GameManager::*)()> ROEMappingKey;
 
 	PlayGame *playGame;

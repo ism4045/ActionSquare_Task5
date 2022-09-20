@@ -1,12 +1,19 @@
 #include "Screen.h"
-#define CENTERPOS {20,3}
+#define PLAYBOX_POS {20,3}
+#define NEXTBOX_POS {48,2}
+#define BOARD_POS {22,4}
+#define NEXTBLOCK_POS {52,5}
+#define INFO_POS {25,9}
+#define MANUAL_POS {25,15}
+#define PAUSE_POS {29,13}
 Screen::Screen(GameManager& gm)
 {
 	gameManager = &gm;
-	CONSOLE_CURSOR_INFO cci;
 
+	CONSOLE_CURSOR_INFO cci;
 	doubleBuffer[0] = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
 	doubleBuffer[1] = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
+	dw = 0;
 
 	cci.dwSize = 1;
 	cci.bVisible = FALSE;
@@ -14,8 +21,8 @@ Screen::Screen(GameManager& gm)
 	SetConsoleCursorInfo(doubleBuffer[1], &cci);
 
 	screenIndex = true;
-	centerPos = CENTERPOS;
 	introStart = clock();
+	introCurrent = introStart;
 	blink = false;
 }
 
@@ -46,8 +53,54 @@ void Screen::ScreenFlipping()
 void Screen::ScreenClear()
 {
 	COORD Coor = { 0, 0 };
-	DWORD dw;
 	FillConsoleOutputCharacter(doubleBuffer[screenIndex], ' ', 100 * 100, Coor, &dw);
+}
+
+void Screen::DrawPlayBoard() {
+	vector<vector<int>> tempBoard = gameManager->GetBoard();
+	pair<short, short> startPos = BOARD_POS;
+
+	for (int i = 0; i < tempBoard.size() - 1; i++) {
+		for (int j = 0; j < tempBoard[i].size(); j++) {
+			COORD pos = { startPos.first + (short)j * 2,startPos.second + (short)i };
+			SetConsoleCursorPosition(doubleBuffer[screenIndex], pos);
+
+			DecisionBlockColor(tempBoard[i][j]);
+			string str = "";
+			if (tempBoard[i][j] == 8)
+				str = " ";
+			else if (tempBoard[i][j] == 9) {
+				ResetColor();
+				str = "бр";
+			}
+			else
+				str = "бс";
+			WriteFile(doubleBuffer[screenIndex], str.c_str(), (DWORD)strlen(str.c_str()), &dw, NULL);
+		}
+	}
+	ResetColor();
+}
+
+void Screen::DrawNextBlock() {
+	Block tempNextBlock = gameManager->GetNextBlock();
+	pair<short, short> startPos = NEXTBLOCK_POS;
+
+	for (int j = 0; j < tempNextBlock.tileInfo.size(); j++) {
+		COORD pos = { startPos.first + (short)tempNextBlock.tileInfo[j].Y * 2,startPos.second + (short)tempNextBlock.tileInfo[j].X };
+		SetConsoleCursorPosition(doubleBuffer[screenIndex], pos);
+
+		DecisionBlockColor((int)tempNextBlock.Type);
+		string str = "бс";
+		WriteFile(doubleBuffer[screenIndex], str.c_str(), (DWORD)strlen(str.c_str()), &dw, NULL);
+	}
+	ResetColor();
+
+}
+
+void Screen::DrawBackGround()
+{
+	Draw2DVector(BG.playBox, PLAYBOX_POS);
+	Draw2DVector(BG.nextBox, NEXTBOX_POS);
 }
 
 void Screen::DrawIntro()
@@ -57,168 +110,92 @@ void Screen::DrawIntro()
 		blink = !blink;
 		introStart = introCurrent;
 	}
-	DWORD dw;
-	pair<short, short> startPos = centerPos;
-	for (int i = 0; i < BG.introStr.size(); i++) {
-		COORD pos = { startPos.first, startPos.second+i};
-		SetConsoleCursorPosition(doubleBuffer[screenIndex], pos);
-
-		string str;
-		if (!blink && i == 2)
-			str = BG.introStr[i];
-		else if (blink && i == 2) 
-			str = " ";
-		else 
-			str = BG.introStr[i];
-
-		WriteFile(doubleBuffer[screenIndex], str.c_str(), strlen(str.c_str()), &dw, NULL);
-	}
-}
-
-void Screen::DrawBackGround()
-{
-	DWORD dw;
-	pair<short, short> startPos = centerPos;
-	for (int i = 0; i < BG.playBox.size(); i++) {
-		for (int j = 0; j < BG.playBox[i].size(); j++) {
-			COORD pos = { startPos.first+(short)j * 2,startPos.second+(short)i };
-			SetConsoleCursorPosition(doubleBuffer[screenIndex], pos);
-			string str = BG.playBox[i][j];
-			WriteFile(doubleBuffer[screenIndex], str.c_str(), strlen(str.c_str()), &dw, NULL);
-		}
-	}
-
-	startPos = { centerPos.first + 28,centerPos.second - 1 };
-	for (int i = 0; i < BG.nextBox.size(); i++) {
-		for (int j = 0; j < BG.nextBox[i].size(); j++) {
-			COORD pos = { startPos.first + (short)j * 2,startPos.second + (short)i };
-			SetConsoleCursorPosition(doubleBuffer[screenIndex], pos);
-			string str = BG.nextBox[i][j];
-			WriteFile(doubleBuffer[screenIndex], str.c_str(), strlen(str.c_str()), &dw, NULL);
-		}
-	}
-}
-
-void Screen::DrawPlayBoard() {
-	DWORD dw;
-	vector<vector<int>> tempBoard = gameManager->playGame->GetBoard();
-	pair<short, short> startPos = { centerPos.first+2,centerPos.second+1 };
-	for (int i = 0; i < tempBoard.size()-1; i++) {
-		for (int j = 0; j < tempBoard[i].size(); j++) {
-			COORD pos = { startPos.first + (short)j * 2,startPos.second + (short)i };
-			SetConsoleCursorPosition(doubleBuffer[screenIndex], pos);
-			DecisionBlockColor(tempBoard[i][j]);
-			string str = "";
-			if (tempBoard[i][j] == 8) 
-				str = " ";
-			else if (tempBoard[i][j] == 9) {
-				ResetColor();
-				str = "бр";
-			}
-			else 
-				str = "бс";
-			WriteFile(doubleBuffer[screenIndex], str.c_str(), strlen(str.c_str()), &dw, NULL);
-		}
-	}
-	ResetColor();
-}
-
-void Screen::DrawNextBlock() {
-	DWORD dw;
-	Block tempNextBlock = gameManager->playGame->GetNextBlock();
-	pair<short, short> startPos = { centerPos.first+32,centerPos.second+2 };
-	for (int j = 0; j < tempNextBlock.tileInfo.size(); j++) {
-		COORD pos = { startPos.first + (short)tempNextBlock.tileInfo[j].Y * 2,startPos.second + (short)tempNextBlock.tileInfo[j].X };
-		SetConsoleCursorPosition(doubleBuffer[screenIndex], pos);
-		DecisionBlockColor((int)tempNextBlock.Type);
-		string str = "бс";
-		WriteFile(doubleBuffer[screenIndex], str.c_str(), strlen(str.c_str()), &dw, NULL);
-	}
-	ResetColor();
-
+	vector<string> temp = BG.introStr;
+	if (blink) temp[2] = " ";
+	Draw1DVector(temp, PLAYBOX_POS);
 }
 
 void Screen::DrawPlayerInfo()
 {
-	int tempLevel = gameManager->playGame->GetLevel();
-	int templine = gameManager->playGame->GetLine();
-	int tempScore = gameManager->playGame->GetScore();
-	DWORD dw;
-	pair<short, short> startPos = { centerPos.first + 5,centerPos.second +6 };
-	COORD pos = { startPos.first * 2, startPos.second };
-	SetConsoleCursorPosition(doubleBuffer[screenIndex], pos);
-	string str = "Level : " + to_string(tempLevel);
-	WriteFile(doubleBuffer[screenIndex], str.c_str(), strlen(str.c_str()), &dw, NULL);
-	pos.Y += 2;
-	SetConsoleCursorPosition(doubleBuffer[screenIndex], pos);
-	str = "Line : " + to_string(templine);
-	WriteFile(doubleBuffer[screenIndex], str.c_str(), strlen(str.c_str()), &dw, NULL);
-	pos.Y += 2;
-	SetConsoleCursorPosition(doubleBuffer[screenIndex], pos);
-	str = "Score : " + to_string(tempScore);
-	WriteFile(doubleBuffer[screenIndex], str.c_str(), strlen(str.c_str()), &dw, NULL);
+	vector<string> temp = BG.infoStr;
+	temp[0] += to_string(gameManager->GetLevel());
+	temp[2] += to_string(gameManager->GetLine());
+	temp[4] += to_string(gameManager->GetScore());
+	Draw1DVector(temp, INFO_POS);
 }
 
 void Screen::DrawROE()
 {
-	DWORD dw;
-	pair<short, short> startPos = centerPos;
-	COORD pos = { startPos.first,startPos.second };
-	SetConsoleCursorPosition(doubleBuffer[screenIndex], pos);
-	string str = "      Game Over     ";
-	WriteFile(doubleBuffer[screenIndex], str.c_str(), strlen(str.c_str()), &dw, NULL);
-	pos.Y+=2;
-	SetConsoleCursorPosition(doubleBuffer[screenIndex], pos);
-	if (gameManager->GetEndMenu()) str = "> Restart       End     ";
-	else str = "  Restart     > End     ";
-	WriteFile(doubleBuffer[screenIndex], str.c_str(), strlen(str.c_str()), &dw, NULL);
+	vector<string> temp = { BG.ROEStr[0],BG.ROEStr[1] };
+	temp.push_back(gameManager->GetEndMenu() ? BG.ROEStr[2] : BG.ROEStr[3]);
+	Draw1DVector(temp, PLAYBOX_POS);
 }
 
 void Screen::DrawManual()
 {
-	DWORD dw;
-	pair<short, short> startPos = { centerPos.first + 5,centerPos.second + 12 };
-	for (int i = 0; i < BG.manual.size(); i++) {
-		COORD pos = { startPos.first * 2, startPos.second };
-		SetConsoleCursorPosition(doubleBuffer[screenIndex], pos);
-		string str = BG.manual[i];
-		WriteFile(doubleBuffer[screenIndex], str.c_str(), strlen(str.c_str()), &dw, NULL);
-		startPos.second += 2;
-	}
+	Draw1DVector(BG.manual, MANUAL_POS);
 }
 
 void Screen::DrawPause()
 {
-	DWORD dw;
-	COORD pos = { centerPos.first + 9,centerPos.second + 10 };
+	COORD pos = PAUSE_POS;
 	SetConsoleCursorPosition(doubleBuffer[screenIndex], pos);
 	string str = "Pause";
-	WriteFile(doubleBuffer[screenIndex], str.c_str(), strlen(str.c_str()), &dw, NULL);
+	WriteFile(doubleBuffer[screenIndex], str.c_str(), (DWORD)strlen(str.c_str()), &dw, NULL);
+}
+
+void Screen::Draw2DVector(vector<vector<string>> arr, pair<short, short> startPos)
+{
+	for (int i = 0; i < arr.size(); i++) {
+		for (int j = 0; j < arr[i].size(); j++) {
+			COORD pos = { startPos.first + (short)j * 2,startPos.second + (short)i };
+			SetConsoleCursorPosition(doubleBuffer[screenIndex], pos);
+			string str = arr[i][j];
+			WriteFile(doubleBuffer[screenIndex], str.c_str(), (DWORD)strlen(str.c_str()), &dw, NULL);
+		}
+	}
+}
+
+void Screen::Draw1DVector(vector<string> arr, pair<short, short> startPos)
+{
+	for (int i = 0; i < arr.size(); i++) {
+		COORD pos = { startPos.first * 2, startPos.second };
+		SetConsoleCursorPosition(doubleBuffer[screenIndex], pos);
+		string str = arr[i];
+		WriteFile(doubleBuffer[screenIndex], str.c_str(), (DWORD)strlen(str.c_str()), &dw, NULL);
+		startPos.second += 2;
+	}
 }
 
 void Screen::Render()
 {
 	ScreenClear();
+
 	switch (gameManager->GetGameState())
 	{
 	case GameState::Intro:
 		DrawIntro();
 		break;
+
 	case GameState::Play:
 		DrawBackGround();
-		if (gameManager->playGame->GetStop())
+		if (gameManager->GetStop())
 			DrawPause();
 		else 
 			DrawPlayBoard();
+
 		DrawNextBlock();
 		DrawPlayerInfo();
 		DrawManual();
 		break;
+
 	case GameState::RestartOrEnd:
 		DrawROE();
 		break;
+
 	default:
 		break;
 	}
+
 	ScreenFlipping();
 }

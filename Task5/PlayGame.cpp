@@ -8,6 +8,11 @@
 PlayGame::PlayGame()
 {
 	Initialize();
+	mciSendString(TEXT("open Move.mp3 type mpegvideo alias move"), NULL, 0, NULL);
+	mciSendString(TEXT("open LineClear.mp3 type mpegvideo alias lineclear"), NULL, 0, NULL);
+
+	mciSendString(TEXT("setaudio move volume to 100"), NULL, 0, NULL);
+	mciSendString(TEXT("setaudio lineclear volume to 100"), NULL, 0, NULL);
 }
 
 void PlayGame::Initialize()
@@ -37,13 +42,8 @@ void PlayGame::Initialize()
 	gamePeriod = 1000.0 / processSpeed;
 
 	gameCurrent = clock();
-	gameStart = gameCurrent - gamePeriod;
+	gameStart = gameCurrent - (clock_t)gamePeriod;
 	stop = false;
-
-	mciSendString(TEXT("open Move.mp3 type mpegvideo alias move"), NULL, 0, NULL);
-	mciSendString(TEXT("open LineClear.mp3 type mpegvideo alias lineclear"), NULL, 0, NULL);
-	mciSendString(TEXT("setaudio move volume to 300"), NULL, 0, NULL);
-	mciSendString(TEXT("setaudio lineclear volume to 100"), NULL, 0, NULL);
 }
 
 void PlayGame::UpdatePerFrameGame()
@@ -100,7 +100,7 @@ void PlayGame::FillBag()
 {
 	vector<BlockType> BlockTable = { Z1,Z2,L1,L2,O,T,I };
 	while (!BlockTable.empty()) {
-		srand(time(NULL));
+		srand((unsigned int)time(NULL));
 		int temp = rand() % BlockTable.size();
 		RandomBag.push(Block(BlockTable.at(temp)));
 		BlockTable.erase(BlockTable.begin() + temp);
@@ -224,6 +224,7 @@ void PlayGame::CheckCompleteLine()
 			board[0].assign(10, BLANK);
 		}
 		removeLine.clear();
+
 		mciSendString(TEXT("seek lineclear notify to start"), NULL, 0, NULL);
 		mciSendString(TEXT("play lineclear"), NULL, 0, NULL);
 	}
@@ -272,7 +273,7 @@ void PlayGame::DoHardDrop()
 		while (CanFall(Pos))
 			Pos.first++;
 		UpdateCurrentBlock();
-		gameStart = gameCurrent - ROCK_DELEY;
+		gameStart = gameCurrent - (clock_t)ROCK_DELEY;
 	}
 }
 

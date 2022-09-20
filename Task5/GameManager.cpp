@@ -2,13 +2,6 @@
 
 GameManager::GameManager()
 {	
-	playGame = new PlayGame();
-	endMenu = true;
-	Initialize();
-}
-
-void GameManager::Initialize()
-{
 	gameState = GameState::Intro;
 	endMenu = true;
 
@@ -34,7 +27,7 @@ void GameManager::DecisionEnd()
 {
 	if (endMenu) {
 		gameState = GameState::Play;
-		playGame->Initialize();
+		this->Initialize();
 		mciSendString(TEXT("stop gameover"), NULL, 0, NULL);
 		mciSendString(TEXT("seek play notify to start"), NULL, 0, NULL);
 		mciSendString(TEXT("play play notify repeat"), NULL, 0, NULL);
@@ -53,12 +46,13 @@ void GameManager::SelectROE_R()
 	endMenu = false;
 }
 
-void GameManager::Update()
+void GameManager::GameUpdate()
 {
 	if (gameState == Play) {
-		playGame->Update();
-		if (playGame->GetPlayGameState() == PlayGameState::GameOver) {
+		this->Update();
+		if (this->GetPlayGameState() == PlayGameState::GameOver) {
 			mciSendString(TEXT("stop play"), NULL, 0, NULL);
+			mciSendString(TEXT("seek gameover notify to start"), NULL, 0, NULL);
 			mciSendString(TEXT("play gameover notify repeat"), NULL, 0, NULL);
 			gameState = RestartOrEnd;
 		}

@@ -11,7 +11,7 @@ int main() {
 	
 	while (GM.GetGameState() != GameState::End)
 	{
-		GM.Update();
+		GM.GameUpdate();
 		SCR.Render();
 		if (_kbhit())
 			I.Input();

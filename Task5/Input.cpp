@@ -44,7 +44,6 @@ bool kbState::operator<(const kbState& kbs) const
 
 InputManager::InputManager(GameManager& gm)
 {
-	playGame = gm.playGame;
 	gameManager = &gm;
 	PlayGameSetInput();
 	IntroSetInput();
@@ -75,30 +74,11 @@ void InputManager::PlayGameSetInput()
 	playGameMappingKey.insert(make_pair(new kbState(VK_SPACE, Press), &PlayGame::DoHardDrop));
 }
 
-void InputManager::PlayGameInput()
-{
-	for (auto iter = playGameMappingKey.begin(); iter != playGameMappingKey.end(); iter++) {
-		iter->first->UpdatePadState();
-		if (iter->first->CanDoFunction()) {
-			(playGame->*(iter->second))();
-		}
-	}
-}
-
 void InputManager::IntroSetInput()
 {
 	introMappingKey.insert(make_pair(new kbState(VK_RETURN, Press), &GameManager::EnterPlay));
 }
 
-void InputManager::IntroInput()
-{
-	for (auto iter = introMappingKey.begin(); iter != introMappingKey.end(); iter++) {
-		iter->first->UpdatePadState();
-		if (iter->first->CanDoFunction()) {
-			(gameManager->*(iter->second))();
-		}
-	}
-}
 
 void InputManager::ROE_SetInput()
 {
@@ -107,9 +87,10 @@ void InputManager::ROE_SetInput()
 	ROEMappingKey.insert(make_pair(new kbState(VK_RETURN, Press), &GameManager::DecisionEnd));
 }
 
-void InputManager::ROE_Input()
+template<class T>
+inline void InputManager::CheckInput(map<kbState*, void(T::*)()> mappingKey)
 {
-	for (auto iter = ROEMappingKey.begin(); iter != ROEMappingKey.end(); iter++) {
+	for (auto iter = mappingKey.begin(); iter != mappingKey.end(); iter++) {
 		iter->first->UpdatePadState();
 		if (iter->first->CanDoFunction()) {
 			(gameManager->*(iter->second))();
@@ -122,13 +103,13 @@ void InputManager::Input()
 	switch (gameManager->GetGameState())
 	{
 	case GameState::Intro:
-		IntroInput();
+		CheckInput(introMappingKey);
 		break;
 	case GameState::Play:
-		PlayGameInput();
+		CheckInput(playGameMappingKey);
 		break;
 	case GameState::RestartOrEnd:
-		ROE_Input();
+		CheckInput(ROEMappingKey);
 		break;
 	default:
 		break;
