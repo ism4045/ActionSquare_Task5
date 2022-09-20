@@ -163,7 +163,7 @@ void Screen::Draw1DVector(vector<string> arr, pair<short, short> startPos)
 		SetConsoleCursorPosition(doubleBuffer[screenIndex], pos);
 		string str = arr[i];
 		WriteFile(doubleBuffer[screenIndex], str.c_str(), (DWORD)strlen(str.c_str()), &dw, NULL);
-		startPos.second += 2;
+		startPos.second++;
 	}
 }
 
