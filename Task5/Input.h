@@ -44,6 +44,5 @@ private:
 	map<kbState*, void (PlayGame::*)()> playGameMappingKey;
 	map<kbState*, void (GameManager::*)()> ROEMappingKey;
 
-	PlayGame *playGame;
 	GameManager* gameManager;
 };

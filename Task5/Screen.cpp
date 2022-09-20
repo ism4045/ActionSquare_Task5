@@ -6,6 +6,7 @@
 #define INFO_POS {25,9}
 #define MANUAL_POS {25,15}
 #define PAUSE_POS {29,13}
+
 Screen::Screen(GameManager& gm)
 {
 	gameManager = &gm;

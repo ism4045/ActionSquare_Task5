@@ -246,9 +246,12 @@ void PlayGame::Stop()
 {
 	clock_t temp = gameCurrent - gameStart;
 	if (stop) {
+		mciSendString(TEXT("play play notify repeat"), NULL, 0, NULL);
 		gameCurrent = clock();
 		gameStart = gameCurrent - temp;
 	}
+	else
+		mciSendString(TEXT("stop play"), NULL, 0, NULL);
 	stop = !stop;
 }
 
