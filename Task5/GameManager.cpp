@@ -5,9 +5,9 @@ GameManager::GameManager()
 	gameState = GameState::Intro;
 	endMenu = true;
 
-	mciSendString(TEXT("open IntroBGM.mp3 type mpegvideo alias intro"), NULL, 0, NULL);
-	mciSendString(TEXT("open PlayBGM.mp3 type mpegvideo alias play"), NULL, 0, NULL);
-	mciSendString(TEXT("open GameOverBGM.mp3 type mpegvideo alias gameover"), NULL, 0, NULL);
+	mciSendString(TEXT("open Sound\\IntroBGM.mp3 type mpegvideo alias intro"), NULL, 0, NULL);
+	mciSendString(TEXT("open Sound\\PlayBGM.mp3 type mpegvideo alias play"), NULL, 0, NULL);
+	mciSendString(TEXT("open Sound\\GameOverBGM.mp3 type mpegvideo alias gameover"), NULL, 0, NULL);
 
 	mciSendString(TEXT("setaudio intro volume to 70"), NULL, 0, NULL);
 	mciSendString(TEXT("setaudio play volume to 50"), NULL, 0, NULL);

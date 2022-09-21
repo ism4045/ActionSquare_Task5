@@ -8,8 +8,8 @@
 Tetris::Tetris()
 {
 	Initialize();
-	mciSendString(TEXT("open Move.mp3 type mpegvideo alias move"), NULL, 0, NULL);
-	mciSendString(TEXT("open LineClear.mp3 type mpegvideo alias lineclear"), NULL, 0, NULL);
+	mciSendString(TEXT("open Sound\\Move.mp3 type mpegvideo alias move"), NULL, 0, NULL);
+	mciSendString(TEXT("open Sound\\LineClear.mp3 type mpegvideo alias lineclear"), NULL, 0, NULL);
 
 	mciSendString(TEXT("setaudio move volume to 100"), NULL, 0, NULL);
 	mciSendString(TEXT("setaudio lineclear volume to 100"), NULL, 0, NULL);
