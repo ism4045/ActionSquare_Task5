@@ -42,76 +42,16 @@ bool kbState::operator<(const kbState& kbs) const
 	return true;
 }
 
-InputManager::InputManager(GameManager& gm)
+void Input::CheckInput(int stage)
 {
-	gameManager = &gm;
-	PlayGameSetInput();
-	IntroSetInput();
-	ROE_SetInput();
-}
-
-InputManager::~InputManager()
-{
-	for (auto iter = playGameMappingKey.begin(); iter != playGameMappingKey.end(); iter++) {
-		delete iter->first;
-	}
-	for (auto iter = introMappingKey.begin(); iter != introMappingKey.end(); iter++) {
-		delete iter->first;
-	}
-	for (auto iter = ROEMappingKey.begin(); iter != ROEMappingKey.end(); iter++) {
-		delete iter->first;
+	for (auto& func : functions[stage]) {
+		func.first->UpdatePadState();
+		if (func.first->CanDoFunction()) 
+			func.second();
 	}
 }
 
-void InputManager::PlayGameSetInput()
+void Input::BindFunction(int stage, int vk, PadState ps, function<void()> const& func)
 {
-	playGameMappingKey.insert(make_pair(new kbState(VK_ESCAPE,Press), &PlayGame::Stop));
-	playGameMappingKey.insert(make_pair(new kbState(VK_LEFT, Press), &PlayGame::MoveL));
-	playGameMappingKey.insert(make_pair(new kbState(VK_RIGHT, Press), &PlayGame::MoveR));
-	playGameMappingKey.insert(make_pair(new kbState(VK_DOWN, Hold), &PlayGame::ChangeSoftDrop));
-	playGameMappingKey.insert(make_pair(new kbState(VK_DOWN, Release), &PlayGame::ReturnNormalSpeed));
-	playGameMappingKey.insert(make_pair(new kbState(VK_UP, Press), &PlayGame::RotateBlock));
-	playGameMappingKey.insert(make_pair(new kbState(VK_SPACE, Press), &PlayGame::DoHardDrop));
-}
-
-void InputManager::IntroSetInput()
-{
-	introMappingKey.insert(make_pair(new kbState(VK_RETURN, Press), &GameManager::EnterPlay));
-}
-
-
-void InputManager::ROE_SetInput()
-{
-	ROEMappingKey.insert(make_pair(new kbState(VK_LEFT, Press), &GameManager::SelectROE_L));
-	ROEMappingKey.insert(make_pair(new kbState(VK_RIGHT, Press), &GameManager::SelectROE_R));
-	ROEMappingKey.insert(make_pair(new kbState(VK_RETURN, Press), &GameManager::DecisionEnd));
-}
-
-template<class T>
-inline void InputManager::CheckInput(map<kbState*, void(T::*)()> mappingKey)
-{
-	for (auto iter = mappingKey.begin(); iter != mappingKey.end(); iter++) {
-		iter->first->UpdatePadState();
-		if (iter->first->CanDoFunction()) {
-			(gameManager->*(iter->second))();
-		}
-	}
-}
-
-void InputManager::Input()
-{
-	switch (gameManager->GetGameState())
-	{
-	case GameState::Intro:
-		CheckInput(introMappingKey);
-		break;
-	case GameState::Play:
-		CheckInput(playGameMappingKey);
-		break;
-	case GameState::RestartOrEnd:
-		CheckInput(ROEMappingKey);
-		break;
-	default:
-		break;
-	}
+	functions[stage].push_back({ new kbState(vk, ps),func });
 }

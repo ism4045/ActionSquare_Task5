@@ -58,7 +58,7 @@ void Screen::ScreenClear()
 }
 
 void Screen::DrawPlayBoard() {
-	vector<vector<int>> tempBoard = gameManager->GetBoard();
+	vector<vector<int>> tempBoard = gameManager->playGame->GetBoard();
 	pair<short, short> startPos = BOARD_POS;
 
 	for (int i = 0; i < tempBoard.size() - 1; i++) {
@@ -83,7 +83,7 @@ void Screen::DrawPlayBoard() {
 }
 
 void Screen::DrawNextBlock() {
-	Block tempNextBlock = gameManager->GetNextBlock();
+	Block tempNextBlock = gameManager->playGame->GetNextBlock();
 	pair<short, short> startPos = NEXTBLOCK_POS;
 
 	for (int j = 0; j < tempNextBlock.tileInfo.size(); j++) {
@@ -119,9 +119,9 @@ void Screen::DrawIntro()
 void Screen::DrawPlayerInfo()
 {
 	vector<string> temp = BG.infoStr;
-	temp[0] += to_string(gameManager->GetLevel());
-	temp[2] += to_string(gameManager->GetLine());
-	temp[4] += to_string(gameManager->GetScore());
+	temp[0] += to_string(gameManager->playGame->GetLevel());
+	temp[2] += to_string(gameManager->playGame->GetLine());
+	temp[4] += to_string(gameManager->playGame->GetScore());
 	Draw1DVector(temp, INFO_POS);
 }
 
@@ -180,9 +180,9 @@ void Screen::Render()
 
 	case GameState::Play:
 		DrawBackGround();
-		if (gameManager->GetStop())
+		if (gameManager->playGame->GetStop())
 			DrawPause();
-		else 
+		else
 			DrawPlayBoard();
 
 		DrawNextBlock();

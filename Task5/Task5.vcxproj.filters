@@ -24,7 +24,7 @@
     <ClCompile Include="BackGround.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="PlayGame.cpp">
+    <ClCompile Include="Tetris.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Block.cpp">
@@ -44,7 +44,7 @@
     <ClInclude Include="BackGround.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="PlayGame.h">
+    <ClInclude Include="Tetris.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Block.h">

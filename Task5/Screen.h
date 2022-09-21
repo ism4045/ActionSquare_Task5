@@ -1,13 +1,15 @@
 #pragma once
+#ifndef _SCREEN_H
+#define _SCREEN_H
 
 #include <Windows.h>
 #include <ctime>
 #include <vector>
+#include <string>
+#include <map>
+#include <functional>
 #include "BackGround.h"
 #include "GameManager.h"
-#include "PlayGame.h"
-#include "Block.h"
-#include <string>
 using namespace std;
 
 class Screen {
@@ -47,3 +49,9 @@ private:
 	clock_t introCurrent;
 	bool blink;
 };
+
+class ScreenManager {
+
+};
+
+#endif // !_SCREEN_H
