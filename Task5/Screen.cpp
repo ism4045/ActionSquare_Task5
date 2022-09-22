@@ -7,9 +7,9 @@
 #define MANUAL_POS {25,15}
 #define PAUSE_POS {29,13}
 
-Screen::Screen(GameManager& gm)
+Screen::Screen(Tetris& t)
 {
-	gameManager = &gm;
+	tetris = &t;
 
 	CONSOLE_CURSOR_INFO cci;
 	doubleBuffer[0] = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
@@ -58,7 +58,7 @@ void Screen::ScreenClear()
 }
 
 void Screen::DrawPlayBoard() {
-	vector<vector<int>> tempBoard = gameManager->playGame->GetBoard();
+	vector<vector<int>> tempBoard = tetris->GetBoard();
 	pair<short, short> startPos = BOARD_POS;
 
 	for (int i = 0; i < tempBoard.size() - 1; i++) {
@@ -83,7 +83,7 @@ void Screen::DrawPlayBoard() {
 }
 
 void Screen::DrawNextBlock() {
-	Block tempNextBlock = gameManager->playGame->GetNextBlock();
+	Block tempNextBlock = tetris->GetNextBlock();
 	pair<short, short> startPos = NEXTBLOCK_POS;
 
 	for (int j = 0; j < tempNextBlock.tileInfo.size(); j++) {
@@ -119,16 +119,16 @@ void Screen::DrawIntro()
 void Screen::DrawPlayerInfo()
 {
 	vector<string> temp = BG.infoStr;
-	temp[0] += to_string(gameManager->playGame->GetLevel());
-	temp[2] += to_string(gameManager->playGame->GetLine());
-	temp[4] += to_string(gameManager->playGame->GetScore());
+	temp[0] += to_string(tetris->GetLevel());
+	temp[2] += to_string(tetris->GetLine());
+	temp[4] += to_string(tetris->GetScore());
 	Draw1DVector(temp, INFO_POS);
 }
 
-void Screen::DrawROE()
+void Screen::DrawROE(bool endMenu)
 {
 	vector<string> temp = { BG.ROEStr[0],BG.ROEStr[1] };
-	temp.push_back(gameManager->GetEndMenu() ? BG.ROEStr[2] : BG.ROEStr[3]);
+	temp.push_back(endMenu ? BG.ROEStr[2] : BG.ROEStr[3]);
 	Draw1DVector(temp, PLAYBOX_POS);
 }
 
@@ -168,19 +168,19 @@ void Screen::Draw1DVector(vector<string> arr, pair<short, short> startPos)
 	}
 }
 
-void Screen::Render()
+void Screen::RecieveHandle(int stage, bool endMenu)
 {
 	ScreenClear();
 
-	switch (gameManager->GetGameState())
+	switch (stage)
 	{
-	case GameState::Intro:
+	case 0:
 		DrawIntro();
 		break;
 
-	case GameState::Play:
+	case 1:
 		DrawBackGround();
-		if (gameManager->playGame->GetStop())
+		if (tetris->GetStop())
 			DrawPause();
 		else
 			DrawPlayBoard();
@@ -190,8 +190,8 @@ void Screen::Render()
 		DrawManual();
 		break;
 
-	case GameState::RestartOrEnd:
-		DrawROE();
+	case 2:
+		DrawROE(endMenu);
 		break;
 
 	default:

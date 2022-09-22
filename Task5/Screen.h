@@ -9,12 +9,12 @@
 #include <map>
 #include <functional>
 #include "BackGround.h"
-#include "GameManager.h"
+#include "Tetris.h"
 using namespace std;
 
 class Screen {
 public:
-	Screen(GameManager& gm);
+	Screen(Tetris& t);
 	void ScreenFlipping();
 	void ScreenClear();
 
@@ -29,9 +29,9 @@ public:
 
 	void Draw2DVector(vector<vector<string>> arr, pair<short, short> startPos);
 	void Draw1DVector(vector<string> arr, pair<short, short> startPos);
-	void DrawROE();
+	void DrawROE(bool endMenu);
 
-	void Render();
+	void RecieveHandle(int stage, bool endMenu);
 
 	void TextColor(int foreGround, int backGround);
 	void DecisionBlockColor(int blockType);
@@ -39,7 +39,7 @@ public:
 
 private:
 	BackGround BG;
-	GameManager* gameManager;
+	Tetris* tetris;
 
 	bool screenIndex;
 	HANDLE doubleBuffer[2];
@@ -48,10 +48,6 @@ private:
 	clock_t introStart;
 	clock_t introCurrent;
 	bool blink;
-};
-
-class ScreenManager {
-
 };
 
 #endif // !_SCREEN_H

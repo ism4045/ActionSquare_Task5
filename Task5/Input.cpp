@@ -42,7 +42,7 @@ bool kbState::operator<(const kbState& kbs) const
 	return true;
 }
 
-void Input::CheckInput(int stage)
+void InputManager::ReceiveHandle(int stage)
 {
 	for (auto& func : functions[stage]) {
 		func.first->UpdatePadState();
@@ -51,7 +51,7 @@ void Input::CheckInput(int stage)
 	}
 }
 
-void Input::BindFunction(int stage, int vk, PadState ps, function<void()> const& func)
+void InputManager::BindFunction(int stage, int vk, PadState ps, function<void()> const& func)
 {
-	functions[stage].push_back({ new kbState(vk, ps),func });
+	functions[stage].push_back({ make_unique<kbState>(kbState(vk, ps)),func });
 }

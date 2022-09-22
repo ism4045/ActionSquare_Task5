@@ -7,6 +7,7 @@
 #include <map>
 #include <functional>
 #include <vector>
+#include <memory>
 using namespace std;
 
 enum PadState {
@@ -17,7 +18,7 @@ enum PadState {
 };
 
 class kbState {
-	friend class Input;
+	friend class InputManager;
 public:
 	kbState(int VK, PadState PS);
 	bool CanDoFunction() { return conditionPadState == currentPadState; }
@@ -33,12 +34,11 @@ private:
 	bool checkBtnIndex;
 };
 
-class Input {
+class InputManager {
 public:
-	void CheckInput(int stage);
+	void ReceiveHandle(int stage);
 	void BindFunction(int stage, int vk, PadState ps, function<void()> const& func);
-
 private:
-	map<int, vector<pair<kbState*, function<void()>>>> functions;
+	map<int, vector<pair<unique_ptr<kbState>, function<void()>>>> functions;
 };
 #endif // !_INPUT_H

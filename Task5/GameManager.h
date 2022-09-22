@@ -5,6 +5,7 @@
 
 #include "Tetris.h"
 #include "Input.h"
+#include "Screen.h"
 #include <mmsystem.h>
 #include <mciapi.h>
 #pragma comment(lib,"winmm.lib")
@@ -19,7 +20,7 @@ enum GameState
 
 class GameManager {
 public:
-	Tetris* playGame;
+	Tetris* tetris;
 	GameManager();
 	~GameManager();
 	void Init();
@@ -30,13 +31,15 @@ public:
 	void DecisionEnd();
 
 	void GameUpdate();
-	void InputManage();
+	void Input();
+	void Render();
 
 	GameState GetGameState() { return gameState; }
 	bool GetEndMenu() { return endMenu; }
 private:
 	GameState gameState;
-	Input* inputManager;
+	InputManager* inputManager;
+	Screen* screen;
 	bool endMenu;
 };
 
