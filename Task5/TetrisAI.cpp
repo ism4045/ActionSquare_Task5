@@ -82,7 +82,7 @@ void TetrisAI::Evaluate()
 	{
 		for (int j = 0; j < board.size(); j++)
 		{
-			block.
+			
 		}
 		block.rotateBlock();
 	}
