@@ -20,12 +20,14 @@ GameManager::GameManager()
 GameManager::~GameManager()
 {
 	delete tetris;
+	delete tetrisAI;
 	delete inputManager;
 }
 
 void GameManager::Init()
 {
 	tetris = new Tetris();
+	tetrisAI = new TetrisAI(tetris);
 	inputManager = new InputManager();
 	screen = new Screen(*tetris);
 
@@ -78,6 +80,7 @@ void GameManager::GameUpdate()
 {
 	if (gameState == Play) {
 		tetris->Update();
+		tetrisAI->Update();
 		if (tetris->GetPlayGameState() == PlayGameState::GameOver) {
 			mciSendString(TEXT("stop play"), NULL, 0, NULL);
 			mciSendString(TEXT("seek gameover notify to start"), NULL, 0, NULL);

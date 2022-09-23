@@ -4,6 +4,7 @@
 #define _GAMEMANAGER_H
 
 #include "Tetris.h"
+#include "TetrisAI.h"
 #include "Input.h"
 #include "Screen.h"
 #include <mmsystem.h>
@@ -21,6 +22,7 @@ enum GameState
 class GameManager {
 public:
 	Tetris* tetris;
+
 	GameManager();
 	~GameManager();
 	void Init();
@@ -39,6 +41,7 @@ public:
 private:
 	GameState gameState;
 	InputManager* inputManager;
+	TetrisAI* tetrisAI;
 	Screen* screen;
 	bool endMenu;
 };

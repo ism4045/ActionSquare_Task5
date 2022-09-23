@@ -1,7 +1,6 @@
 #include "Tetris.h"
 
 #define ROCK_DELEY 500.0
-#define DEFAULTPOS {1,4}
 #define FLOOR -2
 #define BLANK 8
 #define PREVIEWBLOCK 9

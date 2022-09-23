@@ -134,6 +134,7 @@
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="Screen.cpp" />
     <ClCompile Include="Task5.cpp" />
+    <ClCompile Include="TetrisAI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BackGround.h" />
@@ -142,6 +143,7 @@
     <ClInclude Include="Tetris.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Screen.h" />
+    <ClInclude Include="TetrisAI.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
