@@ -139,6 +139,7 @@
   <ItemGroup>
     <ClInclude Include="BackGround.h" />
     <ClInclude Include="Block.h" />
+    <ClInclude Include="BlockContactMask.h" />
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="Tetris.h" />
     <ClInclude Include="Input.h" />

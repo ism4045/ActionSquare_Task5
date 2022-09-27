@@ -1,5 +1,6 @@
 #include "Tetris.h"
 
+#define DEFAULTPOS {1,4}
 #define ROCK_DELEY 500.0
 #define FLOOR -2
 #define BLANK 8
@@ -65,7 +66,7 @@ void Tetris::UpdateState()
 		playGameState = Waiting;
 		gamePeriod = ROCK_DELEY;
 	}
-	else {
+	else if(gameStart > 0) {
 		playGameState = Falling;
 		gamePeriod = 1000.0 / processSpeed;
 	}

@@ -12,8 +12,6 @@
 #include <mciapi.h>
 #pragma comment(lib,"winmm.lib")
 
-#define DEFAULTPOS {1,4}
-
 using namespace std;
 
 enum PlayGameState {
@@ -61,9 +59,10 @@ public:
 	int GetLevel() { return level; }
 	int GetScore() { return score; }
 	bool GetStop() { return stop; }
-	int GetCurrentRotate() { return currentRotate; };
+	pair<int, int> GetPos() { return Pos; }
+	int GetCurrentRotate() { return currentRotate; }
 	PlayGameState GetPlayGameState() { return playGameState; }
-	Block GetCurrentBlock() { return currentBlock; }
+	Block GetBlock() { return currentBlock; }
 	Block GetNextBlock() { return nextBlock; }
 	vector<vector<int>> GetBoard() { return board; }
 
@@ -72,10 +71,10 @@ private:
 
 	PlayGameState playGameState;
 
+	Block currentBlock;
 	Block nextBlock;
 	queue<Block> RandomBag;
 
-	Block currentBlock;
 	int currentRotate;
 	pair<int, int> Pos;
 

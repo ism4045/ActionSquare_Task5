@@ -8,11 +8,11 @@
 #include <queue>
 #include <ctime>
 #include "Tetris.h"
+#include "BlockContactMask.h"
 
 typedef function<void(Tetris*)> FUNC_VOID;
 
-
-struct Target
+struct Destination
 {
 	pair<int, int> pos;
 	int rotate;
@@ -30,24 +30,25 @@ public:
 
 	void Init();
 	void Update();
-	void UpdatePlaying();
+	void PlayAI();
 
-	void Evaluate();
-	void Choose();
-	void Execute();
+	vector<Destination> Evaluate(Tetris t);
+	Destination Choose(vector<Destination>);
+
 
 	void FillAIBehaviors();
-	Target GetTarget();
-	//평가 항목 - 가중치 점검
-	Block GetTargetPosANDRot();
+	Destination GetDestination();
 
-	//실행 가능 여부 - 선택 시
-	bool CanThisWay(Block block);
+
+	//평가 항목 - 가중치 점검
+	Destination EvaluateWeight(Tetris t);
+	int EvaluateHightestHeight(Tetris& t);
+	int EvaluateContactTile(Tetris& t);
+	int EvaluateClearLine(Tetris& t);
+	int EvaluateBlankSpace(Tetris& t);
 
 private:
 	Tetris* tetris;
-
-	vector<Target> targets;
 
 	queue<FUNC_VOID> aiBehaviors;
 
