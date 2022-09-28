@@ -14,7 +14,7 @@ using namespace std;
 
 class Screen {
 public:
-	Screen(Tetris& t);
+	Screen(Tetris& t1, Tetris& t2);
 	void ScreenFlipping();
 	void ScreenClear();
 
@@ -22,10 +22,10 @@ public:
 
 	void DrawBackGround();
 	void DrawManual();
-	void DrawPause();
-	void DrawPlayBoard();
-	void DrawNextBlock();
-	void DrawPlayerInfo();
+	void DrawPause(Tetris* tetris);
+	void DrawPlayBoard(Tetris* tetris);
+	void DrawNextBlock(Tetris* tetris);
+	void DrawPlayerInfo(Tetris* tetris);
 
 	void Draw2DVector(vector<vector<string>> arr, pair<short, short> startPos);
 	void Draw1DVector(vector<string> arr, pair<short, short> startPos);
@@ -39,7 +39,8 @@ public:
 
 private:
 	BackGround BG;
-	Tetris* tetris;
+	Tetris* PlayerTetris;
+	Tetris* AITetris;
 
 	bool screenIndex;
 	HANDLE doubleBuffer[2];

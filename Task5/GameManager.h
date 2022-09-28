@@ -21,7 +21,8 @@ enum GameState
 
 class GameManager {
 public:
-	Tetris* tetris;
+	Tetris* playerTetris;
+	TetrisAI* aiTetris;
 
 	GameManager();
 	~GameManager();
@@ -41,7 +42,6 @@ public:
 private:
 	GameState gameState;
 	InputManager* inputManager;
-	TetrisAI* tetrisAI;
 	Screen* screen;
 	bool endMenu;
 };

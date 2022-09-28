@@ -1,15 +1,19 @@
 #include "Screen.h"
 #define PLAYBOX_POS {20,3}
+#define INTROBOX_POS {20,3}
 #define NEXTBOX_POS {48,2}
 #define BOARD_POS {22,4}
 #define NEXTBLOCK_POS {52,5}
 #define INFO_POS {25,9}
-#define MANUAL_POS {25,15}
+#define MANUAL_POS {15,15}
 #define PAUSE_POS {29,13}
+#define PLAYER_POS -15
+#define AI_POS 40
 
-Screen::Screen(Tetris& t)
+Screen::Screen(Tetris& t1, Tetris& t2)
 {
-	tetris = &t;
+	PlayerTetris = &t1;
+	AITetris = &t2;
 
 	CONSOLE_CURSOR_INFO cci;
 	doubleBuffer[0] = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
@@ -57,10 +61,10 @@ void Screen::ScreenClear()
 	FillConsoleOutputCharacter(doubleBuffer[screenIndex], ' ', 100 * 100, Coor, &dw);
 }
 
-void Screen::DrawPlayBoard() {
+void Screen::DrawPlayBoard(Tetris* tetris) {
 	vector<vector<int>> tempBoard = tetris->GetBoard();
 	pair<short, short> startPos = BOARD_POS;
-
+	tetris->GetAImode() ? startPos.first += AI_POS : startPos.first += PLAYER_POS;
 	for (int i = 0; i < tempBoard.size() - 1; i++) {
 		for (int j = 0; j < tempBoard[i].size(); j++) {
 			COORD pos = { startPos.first + (short)j * 2,startPos.second + (short)i };
@@ -82,10 +86,10 @@ void Screen::DrawPlayBoard() {
 	ResetColor();
 }
 
-void Screen::DrawNextBlock() {
+void Screen::DrawNextBlock(Tetris* tetris) {
 	Block tempNextBlock = tetris->GetNextBlock();
 	pair<short, short> startPos = NEXTBLOCK_POS;
-
+	tetris->GetAImode() ? startPos.first += AI_POS : startPos.first += PLAYER_POS;
 	for (int j = 0; j < tempNextBlock.tileInfo.size(); j++) {
 		COORD pos = { startPos.first + (short)tempNextBlock.tileInfo[j].Y * 2,startPos.second + (short)tempNextBlock.tileInfo[j].X };
 		SetConsoleCursorPosition(doubleBuffer[screenIndex], pos);
@@ -100,8 +104,20 @@ void Screen::DrawNextBlock() {
 
 void Screen::DrawBackGround()
 {
-	Draw2DVector(BG.playBox, PLAYBOX_POS);
-	Draw2DVector(BG.nextBox, NEXTBOX_POS);
+	pair<int, int> playerBox1 = PLAYBOX_POS;
+	pair<int, int> playerBox2 = PLAYBOX_POS;
+	pair<int, int> nextBox1 = NEXTBOX_POS;
+	pair<int, int> nextBox2 = NEXTBOX_POS;
+
+	playerBox1.first += AI_POS;
+	playerBox2.first += PLAYER_POS;
+	nextBox1.first += AI_POS;
+	nextBox2.first += PLAYER_POS;
+
+	Draw2DVector(BG.playBox, playerBox1);
+	Draw2DVector(BG.playBox, playerBox2);
+	Draw2DVector(BG.nextBox, nextBox1);
+	Draw2DVector(BG.nextBox, nextBox2);
 }
 
 void Screen::DrawIntro()
@@ -113,23 +129,25 @@ void Screen::DrawIntro()
 	}
 	vector<string> temp = BG.introStr;
 	if (blink) temp[2] = " ";
-	Draw1DVector(temp, PLAYBOX_POS);
+	Draw1DVector(temp, INTROBOX_POS);
 }
 
-void Screen::DrawPlayerInfo()
+void Screen::DrawPlayerInfo(Tetris* tetris)
 {
+	pair<int, int> startPos = INFO_POS;
+	tetris->GetAImode() ? startPos.first += AI_POS/2 : startPos.first += -8;
 	vector<string> temp = BG.infoStr;
 	temp[0] += to_string(tetris->GetLevel());
 	temp[2] += to_string(tetris->GetLine());
 	temp[4] += to_string(tetris->GetScore());
-	Draw1DVector(temp, INFO_POS);
+	Draw1DVector(temp, startPos);
 }
 
 void Screen::DrawROE(bool endMenu)
 {
 	vector<string> temp = { BG.ROEStr[0],BG.ROEStr[1] };
 	temp.push_back(endMenu ? BG.ROEStr[2] : BG.ROEStr[3]);
-	Draw1DVector(temp, PLAYBOX_POS);
+	Draw1DVector(temp, INTROBOX_POS);
 }
 
 void Screen::DrawManual()
@@ -137,9 +155,11 @@ void Screen::DrawManual()
 	Draw1DVector(BG.manual, MANUAL_POS);
 }
 
-void Screen::DrawPause()
+void Screen::DrawPause(Tetris* tetris)
 {
-	COORD pos = PAUSE_POS;
+	pair<int, int> startPos = PAUSE_POS;
+	tetris->GetAImode() ? startPos.first += AI_POS : startPos.first += PLAYER_POS;
+	COORD pos = { startPos.first, startPos.second };
 	SetConsoleCursorPosition(doubleBuffer[screenIndex], pos);
 	string str = "Pause";
 	WriteFile(doubleBuffer[screenIndex], str.c_str(), (DWORD)strlen(str.c_str()), &dw, NULL);
@@ -180,13 +200,18 @@ void Screen::RecieveHandle(int stage, bool endMenu)
 
 	case 1:
 		DrawBackGround();
-		if (tetris->GetStop())
-			DrawPause();
+		if (PlayerTetris->GetStop())
+			DrawPause(PlayerTetris);
 		else
-			DrawPlayBoard();
+			DrawPlayBoard(PlayerTetris);
+		DrawPlayBoard(AITetris);
 
-		DrawNextBlock();
-		DrawPlayerInfo();
+		DrawNextBlock(PlayerTetris);
+		DrawPlayerInfo(PlayerTetris);
+		
+		DrawNextBlock(AITetris);
+		DrawPlayerInfo(AITetris);
+
 		DrawManual();
 		break;
 

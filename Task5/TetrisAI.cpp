@@ -4,8 +4,8 @@
 #define DEFAULTPOS {1,4}
 #define BLANK 8
 
-TetrisAI::TetrisAI(Tetris* tetris)
-	:tetris(tetris),
+TetrisAI::TetrisAI()
+	:tetris(new Tetris()),
 	aiCurrent(clock()),
 	aiStart(aiCurrent - AI_PLAY_INTERVAL)
 {
@@ -19,7 +19,8 @@ TetrisAI::~TetrisAI()
 
 void TetrisAI::Init()
 {
-
+	tetris->Initialize();
+	tetris->SetAImode(true);
 }
 
 void TetrisAI::Update()
@@ -46,72 +47,92 @@ void TetrisAI::FillAIBehaviors()
 {
 	Destination dest = GetDestination();
 	
-	for (int i = 0; i < dest.rotate; i++){
+	FillRotateBehaviors(dest);
+	FillMoveBehaviors(dest);
+	FillDropBehaviors(dest);
+}
+
+void TetrisAI::FillRotateBehaviors(Destination dest)
+{
+	for (int i = 0; i < dest.rotate; i++) {
 		aiBehaviors.push(&Tetris::RotateBlock);
 	}
-
-	pair<int, int> defaultPos = DEFAULTPOS;
-	for (int i = 0; i < abs(dest.pos.second - defaultPos.second); i++){
+}
+void TetrisAI::FillMoveBehaviors(Destination dest)
+{
+	pair<int, int> defaultPos = afterRotatePos(dest);
+	for (int i = 0; i < abs(dest.pos.second - defaultPos.second); i++) {
 		aiBehaviors.push(dest.pos.second > defaultPos.second ? &Tetris::MoveR : &Tetris::MoveL);
 	}
-
-	aiBehaviors.push(&Tetris::DoHardDrop);
+}
+void TetrisAI::FillDropBehaviors(Destination dest)
+{
+	pair<int, int> defaultPos = DEFAULTPOS;
+	if (dest.pos.first - defaultPos.first != 0)
+		aiBehaviors.push(&Tetris::DoHardDrop);
 }
 
 Destination TetrisAI::GetDestination()
 {
-	vector<Destination> destVect = Evaluate(*tetris);
-	Destination dest = Choose(destVect);
+	vector<Destination> destVec;
+	Destination dest;
 
+	Evaluate(*tetris, destVec);
+	Choose(destVec, dest);
+	
 	return dest;
 }
 
-vector<Destination> TetrisAI::Evaluate(Tetris t)
+void TetrisAI::Evaluate(Tetris t, vector<Destination>& destVec)
 {
-	vector<Destination> destinations;
-
-	for (int i = 0; i < 4; i++) {
-		pair<int, int> pos = t.GetPos();
-		t.MoveL();
-		while (t.GetPos() != pos) {
-			pos = t.GetPos();
-			t.MoveL();
-		}
-
-		while (t.CanMoveR()) {
-			destinations.push_back(EvaluateWeight(t));
-			t.MoveR();
-		}
-
-		t.RotateBlock();
+	for (int i = 0; i < t.GetBoard()[0].size(); i++) {
+		GotoWannaXPos(t, i);
+		EvaluateCurrentXpos(t, destVec);
 	}
-	
-
-	return destinations;
 }
 
-Destination TetrisAI::Choose(vector<Destination> destVect)
+void TetrisAI::Choose(vector<Destination> destVec, Destination& dest)
 {
-	int maxWeight = 0; int maxIndex = 0;
-	for (int i = 0; i < destVect.size(); i++) {
-		if (maxWeight < destVect[i].weight) {
-			maxWeight = destVect[i].weight;
-			maxIndex = i;
+	int maxWeight = 0;
+
+	for (int i = 0; i < destVec.size(); i++) {
+		if (maxWeight < destVec[i].weight) {
+			maxWeight = destVec[i].weight;
+			dest = destVec[i];
 		}
 	}
+}
 
-	return destVect[maxIndex];
+void TetrisAI::GotoWannaXPos(Tetris& t, int xpos)
+{
+	while (t.GetPos().second != xpos)
+	{
+		int beforeXpos = t.GetPos().second;
+
+		xpos > t.GetPos().second ? t.MoveR() : t.MoveL();
+
+		if (beforeXpos == t.GetPos().second)
+			t.RotateBlock();
+	}
+}
+
+void TetrisAI::EvaluateCurrentXpos(Tetris& t, vector<Destination>& destVec)
+{
+	for (int i = 0; i < 4; i++) {
+		destVec.push_back(EvaluateWeight(t));
+		t.RotateBlock();
+	}
 }
 
 Destination TetrisAI::EvaluateWeight(Tetris t)
 {
-	Destination dest;
-	dest.pos = t.GetPos();
-	dest.rotate = t.GetCurrentRotate();
-	dest.weight = 0;
+	t.DoHardDrop();
+
+	Destination dest(t);
+
 	dest.weight += EvaluateHightestHeight(t);
-	dest.weight += EvaluateContactTile(t);
-	dest.weight += EvaluateBlankSpace(t);
+	dest.weight += EvaluateContactSurface(t);
+	//dest.weight += EvaluateBlankSpace(t);
 	dest.weight += EvaluateClearLine(t);
 
 	return dest;
@@ -119,57 +140,47 @@ Destination TetrisAI::EvaluateWeight(Tetris t)
 
 int TetrisAI::EvaluateHightestHeight(Tetris& t)
 { 
-	t.SetPreviewBlock();
-	t.RemoveCurrentBlock();
-
 	vector<vector<int>> board = t.GetBoard();
 	for (int i = 0; i < board.size() - 1; i++){
 		for (int j = 0; j < board[i].size(); j++){
 			if (board[i][j] != BLANK){
-				t.UpdateCurrentBlock();
 				return i;
 			}
-				
 		}
 	}
 
 	return 0;
 }
 
-int TetrisAI::EvaluateContactTile(Tetris& t)
+int TetrisAI::EvaluateContactSurface(Tetris& t)
 {
-	t.DoHardDrop();
-	BlockContactMask mask = BlockContactMask(t.GetBlock().Type);
 	int blankNum = 0;
 
 	vector<vector<int>> board = t.GetBoard();
+	pair<int, int> Pos = t.GetPos();
+	Block currentBlock = t.GetBlock();
 
-	for (int i = 0; i < t.GetCurrentRotate(); i++) {
-		mask.RotateData();
-	}
+	vector<pair<int, int>> dir = { {-1,0}, {0,1},{1,0},{0,-1} };
 
-	int cursorX = t.GetPos().first + mask.StartPoint.first;
-	int cursorY = t.GetPos().second + mask.StartPoint.second;
-	for (int i = 0; i < mask.Data.size() - 1; i++){
-		for (int j = 0; j < mask.Data[i].size(); j++){
-			if (cursorX < board.size() - 1 && cursorY < board[i].size() &&
-				cursorX > 0 && cursorY > 0 &&
-				board[cursorX][cursorY] == BLANK && mask.Data[i][j]){
-				blankNum++;
+	for (int i = 0; i < 4; i++) {
+		int tileX = Pos.first + currentBlock.tileInfo[i].X;
+		int tileY = Pos.second + currentBlock.tileInfo[i].Y;
+		for (int j = 0; j < 4; j++) {
+			int cursorX = tileX + dir[j].first;
+			int cursorY = tileY + dir[j].second;
+			if (cursorX < board.size() && cursorY < board[i].size() && cursorX > -1 && cursorY > -1) {
+				if (board[cursorX][cursorY] == BLANK) {
+					blankNum++;
+				}
 			}
-			cursorY++;
 		}
-		cursorY = t.GetPos().second + mask.StartPoint.second;
-		cursorX++;
 	}
 
-	return -blankNum;
+	return 16 - blankNum;
 }
 
 int TetrisAI::EvaluateBlankSpace(Tetris& t)
 {
-	t.SetPreviewBlock();
-
 	return 1;
 }
 
@@ -186,5 +197,12 @@ int TetrisAI::EvaluateClearLine(Tetris& t)
 	return clearLine;
 }
 
+pair<int, int> TetrisAI::afterRotatePos(Destination dest)
+{
+	Tetris t = *tetris;
 
+	for (int i = 0; i < dest.rotate; i++)
+		t.RotateBlock();
 
+	return t.GetPos();
+}

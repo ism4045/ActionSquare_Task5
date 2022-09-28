@@ -19,27 +19,27 @@ GameManager::GameManager()
 
 GameManager::~GameManager()
 {
-	delete tetris;
-	delete tetrisAI;
+	delete playerTetris;
+	delete aiTetris;
 	delete inputManager;
 }
 
 void GameManager::Init()
 {
-	tetris = new Tetris();
-	tetrisAI = new TetrisAI(tetris);
+	playerTetris = new Tetris();
+	aiTetris = new TetrisAI();
 	inputManager = new InputManager();
-	screen = new Screen(*tetris);
+	screen = new Screen(*playerTetris, aiTetris->GetTetris());
 
 	inputManager->BindFunction(GameState::Intro, VK_RETURN, Press, bind(&GameManager::EnterPlay, this));
 
-	inputManager->BindFunction(GameState::Play, VK_ESCAPE, Press, bind(&Tetris::Stop, tetris));
-	inputManager->BindFunction(GameState::Play, VK_LEFT, Press, bind(&Tetris::MoveL, tetris));
-	inputManager->BindFunction(GameState::Play, VK_RIGHT, Press, bind(&Tetris::MoveR, tetris));
-	inputManager->BindFunction(GameState::Play, VK_DOWN, Hold, bind(&Tetris::ChangeSoftDrop, tetris));
-	inputManager->BindFunction(GameState::Play, VK_DOWN, Release, bind(&Tetris::ReturnNormalSpeed, tetris));
-	inputManager->BindFunction(GameState::Play, VK_UP, Press, bind(&Tetris::RotateBlock, tetris));
-	inputManager->BindFunction(GameState::Play, VK_SPACE, Press, bind(&Tetris::DoHardDrop, tetris));
+	inputManager->BindFunction(GameState::Play, VK_ESCAPE, Press, bind(&Tetris::Stop, playerTetris));
+	inputManager->BindFunction(GameState::Play, VK_LEFT, Press, bind(&Tetris::MoveL, playerTetris));
+	inputManager->BindFunction(GameState::Play, VK_RIGHT, Press, bind(&Tetris::MoveR, playerTetris));
+	inputManager->BindFunction(GameState::Play, VK_DOWN, Hold, bind(&Tetris::ChangeSoftDrop, playerTetris));
+	inputManager->BindFunction(GameState::Play, VK_DOWN, Release, bind(&Tetris::ReturnNormalSpeed, playerTetris));
+	inputManager->BindFunction(GameState::Play, VK_UP, Press, bind(&Tetris::RotateBlock, playerTetris));
+	inputManager->BindFunction(GameState::Play, VK_SPACE, Press, bind(&Tetris::DoHardDrop, playerTetris));
 
 	inputManager->BindFunction(GameState::RestartOrEnd, VK_LEFT, Press, bind(&GameManager::SelectROE_L, this));
 	inputManager->BindFunction(GameState::RestartOrEnd, VK_RIGHT, Press, bind(&GameManager::SelectROE_R, this));
@@ -57,7 +57,8 @@ void GameManager::DecisionEnd()
 {
 	if (endMenu) {
 		gameState = GameState::Play;
-		tetris->Initialize();
+		playerTetris->Initialize();
+		aiTetris->Init();
 		mciSendString(TEXT("stop gameover"), NULL, 0, NULL);
 		mciSendString(TEXT("seek play notify to start"), NULL, 0, NULL);
 		mciSendString(TEXT("play play notify repeat"), NULL, 0, NULL);
@@ -79,9 +80,10 @@ void GameManager::SelectROE_R()
 void GameManager::GameUpdate()
 {
 	if (gameState == Play) {
-		tetris->Update();
-		tetrisAI->Update();
-		if (tetris->GetPlayGameState() == PlayGameState::GameOver) {
+		playerTetris->Update();
+		aiTetris->GetTetris().Update();
+		aiTetris->Update();
+		if (playerTetris->GetPlayGameState() == PlayGameState::GameOver) {
 			mciSendString(TEXT("stop play"), NULL, 0, NULL);
 			mciSendString(TEXT("seek gameover notify to start"), NULL, 0, NULL);
 			mciSendString(TEXT("play gameover notify repeat"), NULL, 0, NULL);

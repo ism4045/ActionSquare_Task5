@@ -8,7 +8,6 @@
 #include <queue>
 #include <ctime>
 #include "Tetris.h"
-#include "BlockContactMask.h"
 
 typedef function<void(Tetris*)> FUNC_VOID;
 
@@ -17,6 +16,20 @@ struct Destination
 	pair<int, int> pos;
 	int rotate;
 	int weight;
+
+	Destination(pair<int, int> pos, int rotate, int weight)
+		:pos(pos),
+		rotate(rotate),
+		weight(weight)
+	{}
+
+	Destination()
+		:Destination({ 0,0 }, 0, 0)
+	{}
+
+	Destination(Tetris& t)
+		:Destination(t.GetPos(), t.GetCurrentRotate(), 0)
+	{}
 };
 
 using namespace std;
@@ -24,7 +37,7 @@ using namespace std;
 class TetrisAI
 {
 public:
-	TetrisAI(Tetris* tetris);
+	TetrisAI();
 	~TetrisAI();
 
 
@@ -32,21 +45,29 @@ public:
 	void Update();
 	void PlayAI();
 
-	vector<Destination> Evaluate(Tetris t);
-	Destination Choose(vector<Destination>);
+	void Evaluate(Tetris t, vector<Destination>& destVec);
+	void Choose(vector<Destination> destVect, Destination& dest);
 
 
 	void FillAIBehaviors();
+	void FillRotateBehaviors(Destination dest);
+	void FillMoveBehaviors(Destination dest);
+	void FillDropBehaviors(Destination dest);
+
+
 	Destination GetDestination();
-
-
-	//평가 항목 - 가중치 점검
 	Destination EvaluateWeight(Tetris t);
 	int EvaluateHightestHeight(Tetris& t);
-	int EvaluateContactTile(Tetris& t);
+	int EvaluateContactSurface(Tetris& t);
 	int EvaluateClearLine(Tetris& t);
 	int EvaluateBlankSpace(Tetris& t);
 
+	void GotoWannaXPos(Tetris& t, int xpos);
+	void EvaluateCurrentXpos(Tetris& t, vector<Destination>& destinations);
+
+	pair<int, int> afterRotatePos(Destination dest);
+
+	Tetris& GetTetris() { return *tetris; }
 private:
 	Tetris* tetris;
 

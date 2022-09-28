@@ -44,6 +44,8 @@ void Tetris::Initialize()
 	gameCurrent = clock();
 	gameStart = gameCurrent - (clock_t)gamePeriod;
 	stop = false;
+
+	AImode = false;
 }
 
 void Tetris::UpdatePerFrameGame()

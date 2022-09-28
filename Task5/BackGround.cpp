@@ -87,6 +87,7 @@ void BackGround::MakeIntro()
 	introStr.push_back("                                      ");
 	introStr.push_back("                                      ");
 	introStr.push_back("      Developer : Lee Ho Seoung       ");
+	introStr.push_back("    AIDeveloper : Oh Tae Sung         ");
 }
 
 void BackGround::MakeROE()

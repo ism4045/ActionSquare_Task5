@@ -55,6 +55,9 @@ public:
 	bool CanMoveR();
 	bool CanRotate(int& moveX, int& moveY);
 
+	bool GetAImode() { return AImode; }
+	void SetAImode(bool mode) { AImode = mode; }
+
 	int GetLine() { return line; }
 	int GetLevel() { return level; }
 	int GetScore() { return score; }
@@ -91,4 +94,5 @@ private:
 	clock_t gameCurrent;
 	double gamePeriod;
 
+	bool AImode;
 };
