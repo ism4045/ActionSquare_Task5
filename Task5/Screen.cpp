@@ -5,10 +5,10 @@
 #define BOARD_POS {22,4}
 #define NEXTBLOCK_POS {52,5}
 #define INFO_POS {25,9}
-#define MANUAL_POS {15,15}
+#define MANUAL_POS {17,15}
 #define PAUSE_POS {29,13}
 #define PLAYER_POS -15
-#define AI_POS 40
+#define AI_POS 45
 
 Screen::Screen(Tetris& t1, Tetris& t2)
 {
@@ -143,10 +143,27 @@ void Screen::DrawPlayerInfo(Tetris* tetris)
 	Draw1DVector(temp, startPos);
 }
 
-void Screen::DrawROE(bool endMenu)
+void Screen::DrawROE(bool endMenu, bool winner)
 {
 	vector<string> temp = { BG.ROEStr[0],BG.ROEStr[1] };
 	temp.push_back(endMenu ? BG.ROEStr[2] : BG.ROEStr[3]);
+	temp.push_back(BG.ROEStr[4]);
+	temp.push_back(BG.ROEStr[5]);
+	temp.push_back(winner ? BG.ROEStr[6] : BG.ROEStr[7]);
+	temp.push_back(BG.ROEStr[8]);
+	temp.push_back(BG.ROEStr[9]);
+	temp.insert(temp.end(), BG.infoStr.begin(), BG.infoStr.end());
+
+	if (winner) {
+		temp[8] = "    " + temp[8] + to_string(PlayerTetris->GetLevel());
+		temp[10] = "    " + temp[10] + to_string(PlayerTetris->GetLine());
+		temp[12] = "    " + temp[12] + to_string(PlayerTetris->GetScore());
+	}
+	else {
+		temp[8] = "    " + temp[8] + to_string(AITetris->GetLevel());
+		temp[10] = "    " + temp[10] + to_string(AITetris->GetLine());
+		temp[12] = "    " + temp[12] + to_string(AITetris->GetScore());
+	}
 	Draw1DVector(temp, INTROBOX_POS);
 }
 
@@ -162,6 +179,17 @@ void Screen::DrawPause(Tetris* tetris)
 	COORD pos = { startPos.first, startPos.second };
 	SetConsoleCursorPosition(doubleBuffer[screenIndex], pos);
 	string str = "Pause";
+	WriteFile(doubleBuffer[screenIndex], str.c_str(), (DWORD)strlen(str.c_str()), &dw, NULL);
+}
+
+void Screen::DrawGameOver(Tetris* tetris)
+{
+	pair<int, int> startPos = PAUSE_POS;
+	startPos.first -= 1;
+	tetris->GetAImode() ? startPos.first += AI_POS : startPos.first += PLAYER_POS;
+	COORD pos = { startPos.first, startPos.second };
+	SetConsoleCursorPosition(doubleBuffer[screenIndex], pos);
+	string str = "Game Over";
 	WriteFile(doubleBuffer[screenIndex], str.c_str(), (DWORD)strlen(str.c_str()), &dw, NULL);
 }
 
@@ -188,7 +216,7 @@ void Screen::Draw1DVector(vector<string> arr, pair<short, short> startPos)
 	}
 }
 
-void Screen::RecieveHandle(int stage, bool endMenu)
+void Screen::RecieveHandle(int stage, bool endMenu, bool winner)
 {
 	ScreenClear();
 
@@ -200,15 +228,23 @@ void Screen::RecieveHandle(int stage, bool endMenu)
 
 	case 1:
 		DrawBackGround();
+
 		if (PlayerTetris->GetStop())
 			DrawPause(PlayerTetris);
+		else if (PlayerTetris->GetPlayGameState() == PlayGameState::GameOver)
+			DrawGameOver(PlayerTetris);
 		else
 			DrawPlayBoard(PlayerTetris);
-		DrawPlayBoard(AITetris);
+
+		if (AITetris->GetStop())
+			DrawPause(AITetris);
+		else if (AITetris->GetPlayGameState() == PlayGameState::GameOver)
+			DrawGameOver(AITetris);
+		else
+			DrawPlayBoard(AITetris);
 
 		DrawNextBlock(PlayerTetris);
 		DrawPlayerInfo(PlayerTetris);
-		
 		DrawNextBlock(AITetris);
 		DrawPlayerInfo(AITetris);
 
@@ -216,7 +252,7 @@ void Screen::RecieveHandle(int stage, bool endMenu)
 		break;
 
 	case 2:
-		DrawROE(endMenu);
+		DrawROE(endMenu, winner);
 		break;
 
 	default:

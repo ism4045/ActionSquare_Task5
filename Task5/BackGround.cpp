@@ -96,6 +96,12 @@ void BackGround::MakeROE()
 	ROEStr.push_back("                    ");
 	ROEStr.push_back("> Restart       End ");
 	ROEStr.push_back("  Restart     > End ");
+	ROEStr.push_back("                    ");
+	ROEStr.push_back("                    ");
+	ROEStr.push_back("    WINNER is YOU   ");
+	ROEStr.push_back("    WINNER is AI    ");
+	ROEStr.push_back("                    ");
+	ROEStr.push_back("                    ");
 }
 
 void BackGround::MakeInfo()

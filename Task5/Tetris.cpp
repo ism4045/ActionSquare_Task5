@@ -76,11 +76,13 @@ void Tetris::UpdateState()
 
 void Tetris::Update()
 {
-	if (!stop) {
-		gameCurrent = clock();
-		UpdateState();
+	if (stop || playGameState == PlayGameState::GameOver) {
+		return;
 	}
-	if ((double)gameCurrent - (double)gameStart >= gamePeriod && !stop) {
+
+	gameCurrent = clock();
+	UpdateState();
+	if ((double)gameCurrent - (double)gameStart >= gamePeriod) {
 		if (playGameState == Waiting) {
 			if (!CanFall(Pos)) {
 				CheckCompleteLine();

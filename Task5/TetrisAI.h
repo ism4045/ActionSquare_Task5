@@ -15,9 +15,9 @@ struct Destination
 {
 	pair<int, int> pos;
 	int rotate;
-	int weight;
+	double weight;
 
-	Destination(pair<int, int> pos, int rotate, int weight)
+	Destination(pair<int, int> pos, int rotate, double weight)
 		:pos(pos),
 		rotate(rotate),
 		weight(weight)
@@ -29,7 +29,10 @@ struct Destination
 
 	Destination(Tetris& t)
 		:Destination(t.GetPos(), t.GetCurrentRotate(), 0)
-	{}
+	{
+		t.DoHardDrop();
+		this->pos = t.GetPos();
+	}
 };
 
 using namespace std;
@@ -48,6 +51,9 @@ public:
 	void Evaluate(Tetris t, vector<Destination>& destVec);
 	void Choose(vector<Destination> destVect, Destination& dest);
 
+	void GotoWannaXPos(Tetris& t, int xpos);
+	void EvaluateCurrentXpos(Tetris& t, vector<Destination>& destinations);
+
 
 	void FillAIBehaviors();
 	void FillRotateBehaviors(Destination dest);
@@ -57,16 +63,12 @@ public:
 
 	Destination GetDestination();
 	Destination EvaluateWeight(Tetris t);
-	int EvaluateHightestHeight(Tetris& t);
-	int EvaluateContactSurface(Tetris& t);
-	int EvaluateClearLine(Tetris& t);
-	int EvaluateBlankSpace(Tetris& t);
+	double EvaluateHightestHeight(Tetris& t);
+	double EvaluateContactSurface(Tetris& t);
+	double EvaluateClearLine(Tetris& t);
+	double EvaluateBlankSpace(Tetris& t);
 
-	void GotoWannaXPos(Tetris& t, int xpos);
-	void EvaluateCurrentXpos(Tetris& t, vector<Destination>& destinations);
-
-	pair<int, int> afterRotatePos(Destination dest);
-
+	
 	Tetris& GetTetris() { return *tetris; }
 private:
 	Tetris* tetris;
@@ -75,6 +77,11 @@ private:
 
 	clock_t aiStart;
 	clock_t aiCurrent;
+
+	const double HIGHEST_HEIGHT_NUM = 4.6;
+	const double EMPTY_BETWEEN_BLOCKS_NUM = -5.8;
+	const double CLEARLINE_NUM = 8.5;
+	const double TOUCH_NUM = 4.0;
 };
 
 #endif // !TETRISAI_H_

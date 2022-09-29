@@ -4,6 +4,7 @@ GameManager::GameManager()
 {
 	gameState = GameState::Intro;
 	endMenu = true;
+	winner = true;
 
 	mciSendString(TEXT("open Sound\\IntroBGM.mp3 type mpegvideo alias intro"), NULL, 0, NULL);
 	mciSendString(TEXT("open Sound\\PlayBGM.mp3 type mpegvideo alias play"), NULL, 0, NULL);
@@ -67,6 +68,24 @@ void GameManager::DecisionEnd()
 		gameState = GameState::End;
 }
 
+bool GameManager::CanDecideWinner()
+{
+	if (playerTetris->GetPlayGameState() == PlayGameState::GameOver) {
+		if (playerTetris->GetScore() < aiTetris->GetTetris().GetScore()) {
+			winner = false;
+			return true;
+		}
+	}
+	else if (aiTetris->GetTetris().GetPlayGameState() == PlayGameState::GameOver) {
+		if (playerTetris->GetScore() > aiTetris->GetTetris().GetScore()) {
+			winner = true;
+			return true;
+		}
+	}
+	
+	return false;
+}
+
 void GameManager::SelectROE_L()
 {
 	endMenu = true;
@@ -81,9 +100,8 @@ void GameManager::GameUpdate()
 {
 	if (gameState == Play) {
 		playerTetris->Update();
-		aiTetris->GetTetris().Update();
 		aiTetris->Update();
-		if (playerTetris->GetPlayGameState() == PlayGameState::GameOver) {
+		if (CanDecideWinner()) {
 			mciSendString(TEXT("stop play"), NULL, 0, NULL);
 			mciSendString(TEXT("seek gameover notify to start"), NULL, 0, NULL);
 			mciSendString(TEXT("play gameover notify repeat"), NULL, 0, NULL);
@@ -111,7 +129,7 @@ void GameManager::Input() {
 
 void GameManager::Render()
 {
-	screen->RecieveHandle(gameState, endMenu);
+	screen->RecieveHandle(gameState, endMenu, winner);
 }
 
 

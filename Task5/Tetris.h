@@ -58,11 +58,11 @@ public:
 	bool GetAImode() { return AImode; }
 	void SetAImode(bool mode) { AImode = mode; }
 
+	pair<int, int> GetPos() { return Pos; }
 	int GetLine() { return line; }
 	int GetLevel() { return level; }
 	int GetScore() { return score; }
 	bool GetStop() { return stop; }
-	pair<int, int> GetPos() { return Pos; }
 	int GetCurrentRotate() { return currentRotate; }
 	PlayGameState GetPlayGameState() { return playGameState; }
 	Block GetBlock() { return currentBlock; }

@@ -23,15 +23,16 @@ public:
 	void DrawBackGround();
 	void DrawManual();
 	void DrawPause(Tetris* tetris);
+	void DrawGameOver(Tetris* tetris);
 	void DrawPlayBoard(Tetris* tetris);
 	void DrawNextBlock(Tetris* tetris);
 	void DrawPlayerInfo(Tetris* tetris);
 
 	void Draw2DVector(vector<vector<string>> arr, pair<short, short> startPos);
 	void Draw1DVector(vector<string> arr, pair<short, short> startPos);
-	void DrawROE(bool endMenu);
+	void DrawROE(bool endMenu, bool winner);
 
-	void RecieveHandle(int stage, bool endMenu);
+	void RecieveHandle(int stage, bool endMenu, bool winner);
 
 	void TextColor(int foreGround, int backGround);
 	void DecisionBlockColor(int blockType);

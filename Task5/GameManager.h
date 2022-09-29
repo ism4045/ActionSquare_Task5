@@ -32,6 +32,7 @@ public:
 	void SelectROE_L();
 	void SelectROE_R();
 	void DecisionEnd();
+	bool CanDecideWinner();
 
 	void GameUpdate();
 	void Input();
@@ -44,6 +45,7 @@ private:
 	InputManager* inputManager;
 	Screen* screen;
 	bool endMenu;
+	bool winner;
 };
 
 #endif // !_GAMEMANAGER_H
