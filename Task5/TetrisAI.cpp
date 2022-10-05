@@ -89,23 +89,28 @@ Destination TetrisAI::GetDestination()
 	vector<Destination> destVec;
 	Destination dest;
 
-	Evaluate(*tetris, destVec);
-	Choose(destVec, dest);
+	destVec = Evaluate(*tetris);
+	dest = Choose(destVec);
 
 	return dest;
 }
 
-void TetrisAI::Evaluate(Tetris t, vector<Destination>& destVec)
+vector<Destination> TetrisAI::Evaluate(Tetris t)
 {
+	vector<Destination> destVec;
+
 	for (int i = 0; i < t.GetBoard()[0].size(); i++) {
 		GotoWannaXPos(t, i);
 		EvaluateCurrentXpos(t, destVec);
 	}
+
+	return destVec;
 }
 
-void TetrisAI::Choose(vector<Destination> destVec, Destination& dest)
+Destination TetrisAI::Choose(vector<Destination> destVec)
 {
 	double maxWeight = INT_MIN;
+	Destination dest;
 
 	for (int i = 0; i < destVec.size(); i++) {
 		if (maxWeight < destVec[i].weight) {
@@ -113,23 +118,26 @@ void TetrisAI::Choose(vector<Destination> destVec, Destination& dest)
 			dest = destVec[i];
 		}
 	}
+
+	return dest;
 }
 
 void TetrisAI::GotoWannaXPos(Tetris& t, int xpos)
 {
-	int rotate = 0;
-	while (t.GetPos().second != xpos)
-	{
+	int gap = t.GetPos().second - xpos;
+	for (int i = 0, rotate = 0; i <= abs(gap); i++) {
 		int beforeXpos = t.GetPos().second;
 
-		xpos > t.GetPos().second ? t.MoveR() : t.MoveL();
+		gap < 0 ? t.MoveR() : t.MoveL();
 
 		if (beforeXpos == t.GetPos().second) {
+			if (rotate == 3) return;
+
 			t.RotateBlock();
 			rotate++;
+			i--;
 		}
-		if (rotate == 4)
-			return;
+		
 	}
 }
 
@@ -214,6 +222,9 @@ double TetrisAI::EvaluateClearLine(Tetris& t)
 {
 	t.CheckCompleteLine();
 	int clearLine = t.GetLine() - tetris->GetLine();
+
+	if (clearLine >= 2)
+		clearLine *= clearLine;
 
 	return (double)clearLine;
 }

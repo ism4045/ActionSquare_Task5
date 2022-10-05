@@ -48,8 +48,8 @@ public:
 	void Update();
 	void PlayAI();
 
-	void Evaluate(Tetris t, vector<Destination>& destVec);
-	void Choose(vector<Destination> destVect, Destination& dest);
+	vector<Destination> Evaluate(Tetris t);
+	Destination Choose(vector<Destination> destVect);
 
 	void GotoWannaXPos(Tetris& t, int xpos);
 	void EvaluateCurrentXpos(Tetris& t, vector<Destination>& destinations);
@@ -78,9 +78,9 @@ private:
 	clock_t aiStart;
 	clock_t aiCurrent;
 
-	const double HIGHEST_HEIGHT_NUM = 4.6;
-	const double EMPTY_BETWEEN_BLOCKS_NUM = -5.8;
-	const double CLEARLINE_NUM = 8.5;
+	const double HIGHEST_HEIGHT_NUM = 5.6;
+	const double EMPTY_BETWEEN_BLOCKS_NUM = -4.8;
+	const double CLEARLINE_NUM = 7.5;
 	const double TOUCH_NUM = 4.0;
 };
 
